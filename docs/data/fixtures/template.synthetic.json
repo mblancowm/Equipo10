@@ -1,16 +1,26 @@
 {
   "syntheticOnly": true,
-  "notice": "Synthetic examples include referral and other entry channels. Stage, outcome, and skill fields are not final product enums or reuse criteria.",
+  "notice": "Every record is fabricated. sourceChannel, skills, role, stage, and outcome values are illustrative; stage and outcome labels are not approved enums or a state machine.",
   "candidateProfiles": [
     {
       "candidateId": "candidate-sample-001",
-      "source": "Referral",
-      "skills": ["SQL", "Reporting"]
+      "sourceChannel": "Referral",
+      "skills": [
+        "SQL",
+        "Reporting"
+      ]
     },
     {
       "candidateId": "candidate-sample-002",
-      "source": "Other",
-      "skills": ["Python", "Data modeling"]
+      "sourceChannel": "Other",
+      "skills": [
+        "Python",
+        "Data modeling"
+      ]
+    },
+    {
+      "candidateId": "candidate-sample-003",
+      "sourceChannel": "Other"
     }
   ],
   "roleApplications": [
@@ -19,21 +29,24 @@
       "candidateId": "candidate-sample-001",
       "role": "Data Analyst",
       "stage": "Interview",
-      "outcome": null
+      "outcome": null,
+      "updatedAt": "2026-01-15T10:00:00Z"
     },
     {
       "applicationId": "application-sample-002",
       "candidateId": "candidate-sample-001",
       "role": "Analytics Consultant",
-      "stage": "Screening",
-      "outcome": null
+      "stage": "Decision",
+      "outcome": "Selected",
+      "updatedAt": "2026-01-16T13:00:00Z"
     },
     {
       "applicationId": "application-sample-003",
       "candidateId": "candidate-sample-002",
       "role": "Data Engineer",
-      "stage": "Interview",
-      "outcome": "Not selected"
+      "stage": "Decision",
+      "outcome": "Not selected",
+      "updatedAt": "2026-01-17T09:30:00Z"
     }
   ]
 }
