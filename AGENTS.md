@@ -1,5 +1,3 @@
-# AGENTS.md
-
 ## Product Purpose
 
 The team is preparing a training MVP for tracking people who enter hiring processes across hiring waves, including candidates who participated in interviews regardless of whether they came through a referral or another channel. The intended workflow links an existing candidate profile to a role, records progress and outcome for that role, and helps recruiters review prior candidates for future openings. The app is a candidate and hiring-pipeline tracker; it does not replace the source recruiting system.
@@ -30,7 +28,7 @@ The current first-slice concept and unresolved scope are recorded in `docs/produ
 - Runtime and package manager: Bun workspaces.
 - API: Hono on Bun.
 - Web: React, strict TypeScript, Vike, and `vike-react`; Vike uses Vite.
-- Database access: Drizzle ORM with SQL. The team has not selected a database driver; record that decision before configuring a connection or migrations.
+- Database access: Drizzle ORM with SQL. SQLite via Bun's built-in `bun:sqlite` driver is the proposed database for the training MVP, pending team review.
 - Shared request/response contracts: Zod in `packages/contracts`.
 - AI SDK/provider and any product-facing AI capability: not selected or approved. Do not infer automated candidate evaluation, scoring, screening, or recommendations from the prototype discussion.
 
@@ -42,6 +40,7 @@ Run from the repository root:
 - Start API and web: `bun run dev`
 - Start API only: `bun run dev:api`
 - Start web only: `bun run dev:web`
+- Set up SQLite and seed synthetic data: `bun run --filter @equipo10/api db:setup`
 - Check TypeScript: `bun run typecheck`
 
 ## Backlog Rules
