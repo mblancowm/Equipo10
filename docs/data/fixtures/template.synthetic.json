@@ -5,21 +5,75 @@
     {
       "candidateId": "candidate-sample-001",
       "sourceChannel": "Referral",
-      "skills": [
-        "SQL",
-        "Reporting"
-      ]
+      "skills": ["SQL", "Reporting"]
     },
     {
       "candidateId": "candidate-sample-002",
       "sourceChannel": "Other",
-      "skills": [
-        "Python",
-        "Data modeling"
-      ]
+      "skills": ["Python", "Data modeling"]
     },
     {
       "candidateId": "candidate-sample-003",
+      "sourceChannel": "Career fair",
+      "skills": ["ETL", "Cloud data platforms"]
+    },
+    {
+      "candidateId": "candidate-sample-004",
+      "sourceChannel": "Recruiter sourcing",
+      "skills": ["Dashboard design", "SQL"]
+    },
+    {
+      "candidateId": "candidate-sample-005",
+      "sourceChannel": "Referral",
+      "skills": ["Python", "Statistics"]
+    },
+    {
+      "candidateId": "candidate-sample-006",
+      "sourceChannel": "Other",
+      "skills": ["Data quality", "dbt"]
+    },
+    {
+      "candidateId": "candidate-sample-007",
+      "sourceChannel": "University program",
+      "skills": ["Java", "Data pipelines"]
+    },
+    {
+      "candidateId": "candidate-sample-008",
+      "sourceChannel": "Referral",
+      "skills": ["Product analytics", "SQL"]
+    },
+    {
+      "candidateId": "candidate-sample-009",
+      "sourceChannel": "Other",
+      "skills": ["Cloud infrastructure", "Python"]
+    },
+    {
+      "candidateId": "candidate-sample-010",
+      "sourceChannel": "Career fair",
+      "skills": ["Data visualization", "Excel"]
+    },
+    {
+      "candidateId": "candidate-sample-011",
+      "sourceChannel": "Recruiter sourcing",
+      "skills": ["Machine learning", "Python"]
+    },
+    {
+      "candidateId": "candidate-sample-012",
+      "sourceChannel": "Other",
+      "skills": ["Data governance", "SQL"]
+    },
+    {
+      "candidateId": "candidate-sample-013",
+      "sourceChannel": "Referral",
+      "skills": ["Business analysis", "Reporting"]
+    },
+    {
+      "candidateId": "candidate-sample-014",
+      "sourceChannel": "Alumni network",
+      "skills": ["API design", "TypeScript"]
+    },
+    {
+      "candidateId": "candidate-sample-015",
       "sourceChannel": "Other"
     }
   ],
@@ -47,6 +101,102 @@
       "stage": "Decision",
       "outcome": "Not selected",
       "updatedAt": "2026-01-17T09:30:00Z"
+    },
+    {
+      "applicationId": "application-sample-004",
+      "candidateId": "candidate-sample-003",
+      "role": "Data Engineer",
+      "stage": "Screening",
+      "outcome": null,
+      "updatedAt": "2026-01-18T11:15:00Z"
+    },
+    {
+      "applicationId": "application-sample-005",
+      "candidateId": "candidate-sample-004",
+      "role": "Data Analyst",
+      "stage": "Decision",
+      "outcome": "Selected",
+      "updatedAt": "2026-01-19T14:00:00Z"
+    },
+    {
+      "applicationId": "application-sample-006",
+      "candidateId": "candidate-sample-005",
+      "role": "Analytics Consultant",
+      "stage": "Interview",
+      "outcome": null,
+      "updatedAt": "2026-01-20T09:45:00Z"
+    },
+    {
+      "applicationId": "application-sample-007",
+      "candidateId": "candidate-sample-006",
+      "role": "Data Quality Analyst",
+      "stage": "Decision",
+      "outcome": "Not selected",
+      "updatedAt": "2026-01-21T16:20:00Z"
+    },
+    {
+      "applicationId": "application-sample-008",
+      "candidateId": "candidate-sample-007",
+      "role": "Data Engineer",
+      "stage": "Added to role",
+      "outcome": null,
+      "updatedAt": "2026-01-22T08:30:00Z"
+    },
+    {
+      "applicationId": "application-sample-009",
+      "candidateId": "candidate-sample-008",
+      "role": "Product Analyst",
+      "stage": "Decision",
+      "outcome": "Selected",
+      "updatedAt": "2026-01-23T12:10:00Z"
+    },
+    {
+      "applicationId": "application-sample-010",
+      "candidateId": "candidate-sample-009",
+      "role": "Cloud Data Engineer",
+      "stage": "Screening",
+      "outcome": null,
+      "updatedAt": "2026-01-24T10:05:00Z"
+    },
+    {
+      "applicationId": "application-sample-011",
+      "candidateId": "candidate-sample-010",
+      "role": "Reporting Analyst",
+      "stage": "Decision",
+      "outcome": "Not selected",
+      "updatedAt": "2026-01-25T15:40:00Z"
+    },
+    {
+      "applicationId": "application-sample-012",
+      "candidateId": "candidate-sample-011",
+      "role": "Analytics Consultant",
+      "stage": "Interview",
+      "outcome": null,
+      "updatedAt": "2026-01-26T13:25:00Z"
+    },
+    {
+      "applicationId": "application-sample-013",
+      "candidateId": "candidate-sample-012",
+      "role": "Data Governance Analyst",
+      "stage": "Decision",
+      "outcome": "Selected",
+      "updatedAt": "2026-01-27T09:00:00Z"
+    },
+    {
+      "applicationId": "application-sample-014",
+      "candidateId": "candidate-sample-013",
+      "role": "Business Analyst",
+      "stage": "Screening",
+      "outcome": null,
+      "updatedAt": "2026-01-28T11:50:00Z"
+    },
+    {
+      "applicationId": "application-sample-015",
+      "candidateId": "candidate-sample-014",
+      "role": "API Developer",
+      "stage": "Decision",
+      "outcome": "Not selected",
+      "updatedAt": "2026-01-29T17:05:00Z"
     }
   ]
 }
