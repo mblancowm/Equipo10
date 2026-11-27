@@ -1,0 +1,3 @@
+# Local SQLite database and sidecar files
+data/*.sqlite
+data/*.sqlite-*
