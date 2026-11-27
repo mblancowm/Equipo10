@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Candidate Pipeline · Training MVP concept</title>
+  <style>
+    :root {
+      --ink: #17223b; --muted: #64718a; --line: #e1e7f0; --paper: #fff;
+      --canvas: #f4f6fa; --navy: #17214a; --blue: #3158d8; --blue-soft: #eef2ff;
+      --teal: #167b78; --teal-soft: #e7f6f4; --amber: #95610b; --amber-soft: #fff4d9;
+      --green: #23734c; --green-soft: #eaf5ee; --red: #a13f40; --red-soft: #fff0ef;
+      --shadow: 0 10px 28px rgba(28, 43, 80, .07);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--canvas); color: var(--ink); font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    button, input, select { font: inherit; }
+    button, select { cursor: pointer; }
+    .shell { min-height: 100vh; display: grid; grid-template-columns: 225px minmax(0, 1fr); }
+    .sidebar { background: var(--navy); color: white; padding: 24px 15px; display: flex; flex-direction: column; gap: 24px; }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 0 10px; }
+    .brand-mark { width: 35px; height: 35px; border-radius: 10px; display: grid; place-items: center; background: #718af0; font-weight: 800; font-size: 17px; }
+    .brand strong { font-size: 15px; letter-spacing: .01em; }
+    .brand small { display: block; color: #c8d0eb; font-size: 11px; margin-top: 1px; }
+    .nav-label { color: #aab6d9; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 0 11px 7px; }
+    .side-nav { display: grid; gap: 5px; }
+    .side-nav button { border: 0; border-radius: 8px; text-align: left; padding: 10px 11px; background: transparent; color: #dce3f7; font-weight: 600; }
+    .side-nav button:hover, .side-nav button.active { background: #29376e; color: #fff; }
+    .nav-icon { display: inline-block; width: 22px; color: #a9baff; }
+    .side-bottom { margin-top: auto; border-top: 1px solid rgba(255,255,255,.14); padding: 15px 10px 0; color: #c8d0eb; font-size: 12px; }
+    .side-bottom strong { display: block; color: white; margin-bottom: 4px; }
+    .main { min-width: 0; padding: 25px clamp(16px, 3vw, 38px) 42px; }
+    .topline { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 24px; }
+    .crumb { color: var(--muted); font-size: 12px; }
+    .access { color: #455573; background: white; border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .eyebrow { color: var(--blue); font-size: 11px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+    h1 { font-size: clamp(25px, 3vw, 32px); line-height: 1.15; letter-spacing: -.035em; margin: 0 0 6px; }
+    h2 { font-size: 18px; margin: 0; letter-spacing: -.02em; }
+    h3 { font-size: 14px; margin: 0 0 5px; }
+    p { margin: 0; }
+    .muted { color: var(--muted); }
+    .title-row { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 17px; }
+    .demo-pill, .pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .demo-pill { color: var(--amber); background: var(--amber-soft); }
+    .pill.blue { color: var(--blue); background: var(--blue-soft); }
+    .pill.teal { color: var(--teal); background: var(--teal-soft); }
+    .pill.green { color: var(--green); background: var(--green-soft); }
+    .pill.red { color: var(--red); background: var(--red-soft); }
+    .pill.gray { color: #5d687b; background: #eef1f5; }
+    .slice-banner { background: #eef2ff; border: 1px solid #d9e1ff; border-radius: 10px; padding: 13px 15px; display: flex; gap: 12px; align-items: start; margin: 17px 0 20px; }
+    .slice-number { flex: 0 0 27px; width: 27px; height: 27px; display: grid; place-items: center; border-radius: 8px; background: var(--blue); color: white; font-size: 12px; font-weight: 800; }
+    .slice-banner strong { display: block; margin-bottom: 2px; }
+    .slice-banner p { color: #4e5c79; font-size: 13px; }
+    .tabs { display: flex; gap: 5px; border-bottom: 1px solid var(--line); margin: 0 0 18px; overflow-x: auto; }
+    .tabs button { border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); padding: 10px 13px; font-weight: 650; white-space: nowrap; }
+    .tabs button.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin: 0 0 13px; }
+    .panel-head p { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .filters { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; margin: 0 0 13px; }
+    .field, .select { border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); padding: 9px 11px; min-height: 38px; }
+    .filters .field { width: min(300px, 100%); }
+    .filters .select { min-width: 155px; }
+    .btn { border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); padding: 8px 11px; font-weight: 650; min-height: 36px; }
+    .btn:hover:not(:disabled) { background: #f5f7fc; }
+    .btn.primary { border-color: var(--blue); background: var(--blue); color: white; }
+    .btn.primary:hover:not(:disabled) { background: #2549c1; }
+    .btn.success { border-color: #b8dfc7; color: var(--green); background: var(--green-soft); }
+    .btn.danger { border-color: #f2d1cf; color: var(--red); background: var(--red-soft); }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .table-box { overflow-x: auto; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); }
+    table { width: 100%; min-width: 1120px; border-collapse: collapse; }
+    th, td { text-align: left; padding: 12px 13px; vertical-align: middle; border-bottom: 1px solid #edf0f5; }
+    th { background: #fafbfe; color: #6b768b; font-size: 10px; text-transform: uppercase; letter-spacing: .09em; }
+    tr:last-child td { border-bottom: 0; }
+    .person-cell { display: flex; align-items: center; gap: 10px; min-width: 160px; }
+    .avatar { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 34px; border-radius: 50%; background: #e7edff; color: #3855b2; font-size: 11px; font-weight: 800; }
+    .person-name { font-weight: 700; }
+    .person-sub { color: var(--muted); font-size: 11px; }
+    .skill-list { display: flex; flex-wrap: wrap; gap: 4px; max-width: 240px; }
+    .skill { display: inline-block; padding: 3px 7px; border-radius: 5px; color: #536078; background: #f0f3f8; font-size: 10px; white-space: nowrap; }
+    .stage-select, .outcome-select { min-width: 132px; padding: 6px 24px 6px 8px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: white; font-size: 12px; }
+    .source-label { color: var(--teal); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+    .empty { padding: 36px 18px; text-align: center; color: var(--muted); }
+    .empty strong { display: block; color: var(--ink); margin-bottom: 4px; }
+    .notice { display: flex; align-items: start; gap: 9px; padding: 12px 14px; margin-bottom: 14px; border-radius: 9px; background: #f0f7f7; border: 1px solid #d4ebea; color: #416364; font-size: 12px; }
+    .notice strong { color: #245554; }
+    .notice.amber { background: #fff9e9; border-color: #f2e4b9; color: #765a1c; }
+    .notice.amber strong { color: #68490b; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 13px; }
+    .card { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 16px; box-shadow: var(--shadow); }
+    .card-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; margin-bottom: 12px; }
+    .detail-list { display: grid; gap: 8px; margin: 12px 0; }
+    .detail-row { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid #edf0f5; padding-bottom: 7px; }
+    .detail-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .detail-label { color: var(--muted); font-size: 12px; }
+    .detail-value { font-weight: 650; text-align: right; font-size: 12px; }
+    .history { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0 12px; }
+    .history-details { margin-top: 6px; color: var(--muted); font-size: 10px; }
+    .history-details summary { cursor: pointer; color: var(--blue); font-weight: 650; }
+    .history-details ol { margin: 7px 0 3px; padding-left: 18px; }
+    .history-details li { margin: 3px 0; }
+    .review-cell { min-width: 155px; }
+    .section-heading { margin: 20px 0 10px; font-size: 15px; }
+    .history-step { color: #56647d; background: #f0f3f8; border-radius: 6px; padding: 4px 7px; font-size: 10px; }
+    .history-step.current { background: var(--blue-soft); color: var(--blue); font-weight: 700; }
+    .card-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 13px; }
+    .card-actions .select { min-width: 185px; }
+    .prototype-note { margin-top: 18px; padding-top: 13px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+    .toast { position: fixed; right: 20px; bottom: 20px; z-index: 5; max-width: min(420px, calc(100vw - 32px)); padding: 12px 15px; background: #202d4a; color: white; border-radius: 9px; box-shadow: var(--shadow); opacity: 0; transform: translateY(8px); pointer-events: none; transition: .18s ease; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .hidden { display: none !important; }
+    @media (max-width: 840px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { padding: 13px 15px; gap: 12px; }
+      .sidebar-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+      .sidebar .nav-label, .side-bottom { display: none; }
+      .side-nav { display: flex; overflow-x: auto; }
+      .side-nav button { white-space: nowrap; }
+      .main { padding-top: 19px; }
+    }
+    @media (max-width: 620px) {
+      .topline, .title-row { align-items: flex-start; flex-direction: column; }
+      .card-grid { grid-template-columns: 1fr; }
+      .slice-banner { padding: 11px; }
+      .panel-head { align-items: start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" aria-label="Main navigation">
+    <div class="sidebar-top">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">T</div>
+        <div><strong>HR talent workspace</strong><small>Candidate history</small></div>
+      </div>
+    </div>
+    <div>
+      <div class="nav-label">Workspace</div>
+      <nav class="side-nav" aria-label="Sections">
+        <button type="button" class="active" data-view="pipeline"><span class="nav-icon">▦</span>Role pipeline</button>
+        <button type="button" data-view="profiles"><span class="nav-icon">◎</span>Source profiles</button>
+        <button type="button" data-view="reviews"><span class="nav-icon">⌕</span>Reuse review</button>
+      </nav>
+    </div>
+    <div class="side-bottom">
+      <strong>Training concept</strong>
+      Synthetic sample data · source profiles are read-only
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topline">
+      <div class="crumb">HR workspace&nbsp; / &nbsp;<span id="crumb-label">Role pipeline</span></div>
+      <span class="access">HR access · SSO not connected</span>
+    </div>
+
+    <div class="title-row">
+      <div>
+        <div class="eyebrow">Candidate operations</div>
+        <h1 id="page-title">Role pipeline</h1>
+        <p class="muted" id="page-subtitle">Track progress and outcomes for each role application.</p>
+      </div>
+      <span class="demo-pill">● Synthetic demo data</span>
+    </div>
+
+    <div class="slice-banner">
+      <div class="slice-number">1</div>
+      <div>
+        <strong>Track a person's hiring history, one role at a time</strong>
+        <p>Keep source profiles unchanged. After Screening passed, Final interview, and Not selected, HR may request a future-role review. An approved review can start a separate application.</p>
+      </div>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Candidate views">
+      <button type="button" class="active" role="tab" aria-selected="true" data-view="pipeline">Role pipeline</button>
+      <button type="button" role="tab" aria-selected="false" data-view="profiles">Source profiles</button>
+      <button type="button" role="tab" aria-selected="false" data-view="reviews">Reuse review</button>
+    </div>
+
+    <div id="content" aria-live="polite"></div>
+    <p class="prototype-note">Final discussion prototype only: no SSO, API, source-system connection, or database. All names and records are fabricated; changes reset when this page reloads. Skills are descriptive and unscored. There is no admin or hiring-manager view.</p>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  var stages = ["Added to role", "Initial screening", "Screening passed", "Interview", "Final interview", "Decision"];
+  var roles = [
+    { name: "Data Analyst", department: "Analytics" },
+    { name: "Data Engineer", department: "Technology" },
+    { name: "Analytics Consultant", department: "Consulting" },
+    { name: "Product Analyst", department: "Product" },
+    { name: "Risk Analyst", department: "Finance" },
+    { name: "Business Analyst", department: "Operations" },
+    { name: "People Analytics Analyst", department: "HR" },
+    { name: "Reporting Analyst", department: "Analytics" },
+    { name: "Workforce Analyst", department: "People" }
+  ];
+  var departments = Array.from(new Set(roles.map(function (role) { return role.department; })));
+  var profiles = [
+    { id: "SRC-1042", name: "Elena Mora", source: "Referral", skills: ["SQL", "Reporting"] },
+    { id: "SRC-1088", name: "Andres Solano", source: "Other source", skills: ["Python", "Data modeling"] },
+    { id: "SRC-1125", name: "Lucia Campos", source: "Referral", skills: ["Consulting", "Power BI"] },
+    { id: "SRC-1181", name: "Diego Vargas", source: "Other source", skills: ["Cloud", "Data modeling"] },
+    { id: "SRC-1210", name: "Sofia Rojas", source: "Referral", skills: ["Business analysis", "Excel"] },
+    { id: "SRC-1244", name: "Camila Vega", source: "Career fair", skills: ["Research", "Planning"] },
+    { id: "SRC-1266", name: "Mateo Ruiz", source: "Other source", skills: ["People analytics", "SQL"] },
+    { id: "SRC-1304", name: "Valeria Soto", source: "Referral", skills: ["Reporting", "Excel"] },
+    { id: "SRC-1320", name: "Daniela Cruz", source: "Other source", skills: ["Data analysis", "Visualization"] }
+  ];
+  var applications = [
+    {
+      id: "APP-301", sourceId: "SRC-1042", role: "Data Analyst", department: "Analytics",
+      stage: "Decision", outcome: "Not selected", updatedAt: "2026-11-24T17:00:00Z",
+      stageHistory: [
+        { stage: "Added to role", reachedAt: "2026-11-17T14:00:00Z" },
+        { stage: "Initial screening", reachedAt: "2026-11-18T15:30:00Z" },
+        { stage: "Screening passed", reachedAt: "2026-11-19T16:00:00Z" },
+        { stage: "Interview", reachedAt: "2026-11-21T15:00:00Z" },
+        { stage: "Final interview", reachedAt: "2026-11-23T16:00:00Z" },
+        { stage: "Decision", reachedAt: "2026-11-24T17:00:00Z" }
+      ]
+    },
+    {
+      id: "APP-302", sourceId: "SRC-1088", role: "Data Engineer", department: "Technology",
+      stage: "Screening passed", outcome: null, updatedAt: "2026-11-25T16:00:00Z",
+      stageHistory: [
+        { stage: "Added to role", reachedAt: "2026-11-23T14:00:00Z" },
+        { stage: "Initial screening", reachedAt: "2026-11-24T15:00:00Z" },
+        { stage: "Screening passed", reachedAt: "2026-11-25T16:00:00Z" }
+      ]
+    },
+    {
+      id: "APP-303", sourceId: "SRC-1125", role: "Analytics Consultant", department: "Consulting",
+      stage: "Decision", outcome: "Selected", updatedAt: "2026-11-20T18:00:00Z",
+      stageHistory: [
+        { stage: "Added to role", reachedAt: "2026-11-10T14:00:00Z" },
+        { stage: "Initial screening", reachedAt: "2026-11-11T15:00:00Z" },
+        { stage: "Screening passed", reachedAt: "2026-11-12T16:00:00Z" },
+        { stage: "Interview", reachedAt: "2026-11-16T15:00:00Z" },
+        { stage: "Final interview", reachedAt: "2026-11-19T16:00:00Z" },
+        { stage: "Decision", reachedAt: "2026-11-20T18:00:00Z" }
+      ]
+    },
+    {
+      id: "APP-304", sourceId: "SRC-1210", role: "Product Analyst", department: "Product",
+      stage: "Final interview", outcome: null, updatedAt: "2026-11-26T16:00:00Z",
+      stageHistory: [
+        { stage: "Added to role", reachedAt: "2026-11-18T14:00:00Z" },
+        { stage: "Initial screening", reachedAt: "2026-11-19T15:00:00Z" },
+        { stage: "Screening passed", reachedAt: "2026-11-20T16:00:00Z" },
+        { stage: "Interview", reachedAt: "2026-11-24T15:00:00Z" },
+        { stage: "Final interview", reachedAt: "2026-11-26T16:00:00Z" }
+      ]
+    },
+    {
+      id: "APP-305", sourceId: "SRC-1181", role: "Risk Analyst", department: "Finance",
+      stage: "Decision", outcome: "Not selected", updatedAt: "2026-11-22T17:00:00Z",
+      stageHistory: [
+        { stage: "Added to role", reachedAt: "2026-11-12T14:00:00Z" },
+        { stage: "Initial screening", reachedAt: "2026-11-13T15:00:00Z" },
+        { stage: "Screening passed", reachedAt: "2026-11-14T16:00:00Z" },
+        { stage: "Interview", reachedAt: "2026-11-17T15:00:00Z" },
+        { stage: "Final interview", reachedAt: "2026-11-20T16:00:00Z" },
+        { stage: "Decision", reachedAt: "2026-11-22T17:00:00Z" }
+      ]
+    },
+    {
+      id: "APP-306", sourceId: "SRC-1244", role: "Business Analyst", department: "Operations",
+      stage: "Decision", outcome: "Not selected", updatedAt: "2026-11-21T17:00:00Z",
+      stageHistory: [
+        { stage: "Added to role", reachedAt: "2026-11-15T14:00:00Z" },
+        { stage: "Initial screening", reachedAt: "2026-11-16T15:00:00Z" },
+        { stage: "Screening passed", reachedAt: "2026-11-17T16:00:00Z" },
+        { stage: "Interview", reachedAt: "2026-11-20T15:00:00Z" },
+        { stage: "Decision", reachedAt: "2026-11-21T17:00:00Z" }
+      ]
+    },
+    {
+      id: "APP-307", sourceId: "SRC-1266", role: "People Analytics Analyst", department: "HR",
+      stage: "Decision", outcome: "Not selected", updatedAt: "2026-11-19T17:00:00Z",
+      stageHistory: [
+        { stage: "Added to role", reachedAt: "2026-11-11T14:00:00Z" },
+        { stage: "Initial screening", reachedAt: "2026-11-12T15:00:00Z" },
+        { stage: "Screening passed", reachedAt: "2026-11-13T16:00:00Z" },
+        { stage: "Interview", reachedAt: "2026-11-16T15:00:00Z" },
+        { stage: "Final interview", reachedAt: "2026-11-18T16:00:00Z" },
+        { stage: "Decision", reachedAt: "2026-11-19T17:00:00Z" }
+      ]
+    },
+    {
+      id: "APP-308", sourceId: "SRC-1304", role: "Reporting Analyst", department: "Analytics",
+      stage: "Interview", outcome: "Withdrawn", updatedAt: "2026-11-25T15:00:00Z",
+      stageHistory: [
+        { stage: "Added to role", reachedAt: "2026-11-20T14:00:00Z" },
+        { stage: "Initial screening", reachedAt: "2026-11-21T15:00:00Z" },
+        { stage: "Screening passed", reachedAt: "2026-11-22T16:00:00Z" },
+        { stage: "Interview", reachedAt: "2026-11-25T15:00:00Z" }
+      ]
+    },
+    {
+      id: "APP-309", sourceId: "SRC-1320", role: "Workforce Analyst", department: "People",
+      stage: "Decision", outcome: "Not selected", updatedAt: "2026-11-26T17:00:00Z",
+      stageHistory: [
+        { stage: "Added to role", reachedAt: "2026-11-18T14:00:00Z" },
+        { stage: "Initial screening", reachedAt: "2026-11-19T15:00:00Z" },
+        { stage: "Screening passed", reachedAt: "2026-11-20T16:00:00Z" },
+        { stage: "Interview", reachedAt: "2026-11-23T15:00:00Z" },
+        { stage: "Final interview", reachedAt: "2026-11-25T16:00:00Z" },
+        { stage: "Decision", reachedAt: "2026-11-26T17:00:00Z" }
+      ]
+    }
+  ];
+  var reviews = [
+    { id: "REV-201", sourceId: "SRC-1042", applicationId: "APP-301", status: "Pending", reviewer: null, reviewedAt: null },
+    { id: "REV-202", sourceId: "SRC-1181", applicationId: "APP-305", status: "Approved", reviewer: "HR demo user", reviewedAt: "2026-11-23T17:00:00Z" },
+    { id: "REV-203", sourceId: "SRC-1266", applicationId: "APP-307", status: "Not approved", reviewer: "HR demo user", reviewedAt: "2026-11-20T17:00:00Z" }
+  ];
+  var activeView = "pipeline";
+  var selectedRole = roles[0].name;
+  var pipelineFilters = { query: "", role: "", department: "", stage: "", outcome: "" };
+  var profileQuery = "";
+  var toastTimer;
+
+  function profile(sourceId) {
+    return profiles.find(function (item) { return item.id === sourceId; });
+  }
+  function application(applicationId) {
+    return applications.find(function (item) { return item.id === applicationId; });
+  }
+  function roleForName(roleName) {
+    return roles.find(function (item) { return item.name === roleName; });
+  }
+  function escapeHtml(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, function (char) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char];
+    });
+  }
+  function initials(name) {
+    return name.split(" ").map(function (part) { return part.charAt(0); }).slice(0, 2).join("");
+  }
+  function timestampNow() {
+    return new Date().toISOString();
+  }
+  function formatTimestamp(value) {
+    if (!value) return "—";
+    return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+  }
+  function skillsMarkup(skills) {
+    return '<div class="skill-list">' + (skills || []).map(function (skill) {
+      return '<span class="skill">' + escapeHtml(skill) + '</span>';
+    }).join("") + '</div>';
+  }
+  function showToast(message) {
+    var toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(function () { toast.classList.remove("show"); }, 2800);
+  }
+  function optionList(items, selected, label) {
+    return '<option value=""' + (selected ? "" : " selected") + '>' + escapeHtml(label) + '</option>' +
+      items.map(function (item) {
+        var value = typeof item === "string" ? item : item.name;
+        var text = typeof item === "string" ? item : item.name + " · " + item.department;
+        return '<option value="' + escapeHtml(value) + '"' + (value === selected ? " selected" : "") + '>' + escapeHtml(text) + '</option>';
+      }).join("");
+  }
+  function roleOptions(selected) {
+    return roles.map(function (role) {
+      return '<option value="' + escapeHtml(role.name) + '"' + (role.name === selected ? " selected" : "") + '>' + escapeHtml(role.name + " · " + role.department) + '</option>';
+    }).join("");
+  }
+  function stageOptions(selected) {
+    return stages.map(function (stage) {
+      return '<option value="' + escapeHtml(stage) + '"' + (stage === selected ? " selected" : "") + '>' + escapeHtml(stage) + '</option>';
+    }).join("");
+  }
+  function outcomeOptions(selected) {
+    var options = [
+      { value: "", label: "No decision" },
+      { value: "Selected", label: "Selected" },
+      { value: "Not selected", label: "Not selected" },
+      { value: "Withdrawn", label: "Withdrawn" }
+    ];
+    return options.map(function (option) {
+      return '<option value="' + escapeHtml(option.value) + '"' + (option.value === selected ? " selected" : "") + '>' + escapeHtml(option.label) + '</option>';
+    }).join("");
+  }
+  function isEligible(app) {
+    var reached = app.stageHistory.map(function (event) { return event.stage; });
+    return app.outcome === "Not selected" &&
+      reached.indexOf("Screening passed") >= 0 &&
+      reached.indexOf("Final interview") >= 0;
+  }
+  function reviewForApplication(applicationId) {
+    return reviews.find(function (item) { return item.applicationId === applicationId; });
+  }
+  function approvedReviewForProfile(sourceId) {
+    return reviews.find(function (item) {
+      var triggeringApp = application(item.applicationId);
+      return item.sourceId === sourceId && item.status === "Approved" && triggeringApp && isEligible(triggeringApp);
+    });
+  }
+  function profileNeedsReview(sourceId) {
+    return applications.some(function (app) { return app.sourceId === sourceId && isEligible(app); });
+  }
+  function profileHasApplication(sourceId) {
+    return applications.some(function (app) { return app.sourceId === sourceId; });
+  }
+  function renderHistory(app) {
+    var items = app.stageHistory.map(function (event) {
+      return '<li><strong>' + escapeHtml(event.stage) + '</strong><span> · ' + escapeHtml(formatTimestamp(event.reachedAt)) + '</span></li>';
+    }).join("");
+    return '<details class="history-details"><summary>View history (' + app.stageHistory.length + ')</summary><ol>' + items + '</ol></details>';
+  }
+  function reviewStatusMarkup(review, app) {
+    if (!review) {
+      return isEligible(app)
+        ? '<button type="button" class="btn" data-request-review="' + escapeHtml(app.id) + '">Request HR review</button>'
+        : '<span class="pill gray">No review</span>';
+    }
+    var tone = review.status === "Approved" ? "green" : review.status === "Not approved" ? "red" : "amber";
+    var current = isEligible(app);
+    var label = review.status + (current ? "" : " · no longer eligible");
+    return '<span class="pill ' + tone + '">' + escapeHtml(label) + '</span>';
+  }
+  function renderPipeline() {
+    var rows = applications.map(function (app) {
+      var person = profile(app.sourceId);
+      return '<tr data-role-filter="' + escapeHtml(app.role) + '" data-department-filter="' + escapeHtml(app.department) + '">' +
+        '<td><div class="person-cell"><span class="avatar">' + escapeHtml(initials(person.name)) + '</span><div><div class="person-name">' + escapeHtml(person.name) + '</div><div class="person-sub">' + escapeHtml(person.id) + '</div></div></div></td>' +
+        '<td>' + escapeHtml(app.role) + '<div class="person-sub">' + escapeHtml(app.department) + '</div></td>' +
+        '<td><select class="stage-select" data-stage="' + escapeHtml(app.id) + '" aria-label="Stage for ' + escapeHtml(person.name) + '">' + stageOptions(app.stage) + '</select>' + renderHistory(app) + '</td>' +
+        '<td><select class="outcome-select" data-outcome="' + escapeHtml(app.id) + '" aria-label="Outcome for ' + escapeHtml(person.name) + '">' + outcomeOptions(app.outcome || "") + '</select></td>' +
+        '<td class="review-cell">' + reviewStatusMarkup(reviewForApplication(app.id), app) + '</td>' +
+        '<td>' + skillsMarkup(person.skills) + '</td><td><span class="pill gray">' + escapeHtml(formatTimestamp(app.updatedAt)) + '</span></td></tr>';
+    }).join("");
+    return '<div class="panel-head"><div><h2>Role applications</h2><p>One row per role process; stage history and outcome stay with that application.</p></div><span class="pill blue">' + applications.length + ' sample applications</span></div>' +
+      '<div class="notice"><span>↳</span><div><strong>Source profiles stay read-only.</strong> Stage updates append a timestamped event. Outcomes are recorded separately. Skills are descriptive and unscored.</div></div>' +
+      '<div class="filters"><input id="pipeline-search" class="field" type="search" placeholder="Search candidate, role, department, or skill" aria-label="Search applications" value="' + escapeHtml(pipelineFilters.query) + '">' +
+      '<select id="pipeline-role-filter" class="select" aria-label="Filter by role">' + optionList(roles.map(function (role) { return role.name; }), pipelineFilters.role, "All roles") + '</select>' +
+      '<select id="pipeline-department-filter" class="select" aria-label="Filter by department">' + optionList(departments, pipelineFilters.department, "All departments") + '</select>' +
+      '<select id="pipeline-stage-filter" class="select" aria-label="Filter by stage">' + optionList(stages, pipelineFilters.stage, "All stages") + '</select>' +
+      '<select id="pipeline-outcome-filter" class="select" aria-label="Filter by outcome">' + optionList(["Selected", "Not selected", "Withdrawn"], pipelineFilters.outcome, "All outcomes") + '</select></div>' +
+      '<div class="table-box"><table><thead><tr><th>Candidate</th><th>Role / department</th><th>Current stage / history</th><th>Outcome</th><th>Future-role review</th><th>Skills · unscored</th><th>Last updated</th></tr></thead><tbody id="pipeline-body">' + rows + '</tbody></table><div id="pipeline-empty" class="empty hidden"><strong>No matching applications</strong>Try changing the search or filters.</div></div>';
+  }
+  function renderProfiles() {
+    var rows = profiles.map(function (person) {
+      var already = applications.some(function (app) { return app.sourceId === person.id && app.role === selectedRole; });
+      var needsReview = profileNeedsReview(person.id);
+      var approved = Boolean(approvedReviewForProfile(person.id));
+      var canLink = !needsReview || approved;
+      var actionText = already ? "Already linked" : needsReview && !approved ? "Needs approved review" : "Link to role";
+      return '<tr><td><div class="person-cell"><span class="avatar">' + escapeHtml(initials(person.name)) + '</span><div><div class="person-name">' + escapeHtml(person.name) + '</div><div class="person-sub">' + escapeHtml(person.id) + '</div></div></div></td>' +
+        '<td><span class="source-label">' + escapeHtml(person.source) + '</span></td><td>' + skillsMarkup(person.skills) + '</td>' +
+        '<td>' + (approved ? '<span class="pill green">HR approved</span>' : needsReview ? '<span class="pill amber">Review required</span>' : profileHasApplication(person.id) ? '<span class="pill gray">Prior application</span>' : '<span class="pill gray">No prior application</span>') + '</td>' +
+        '<td><button type="button" class="btn ' + (canLink && !already ? "primary" : "") + '" data-link="' + escapeHtml(person.id) + '"' + (already || !canLink ? " disabled" : "") + '>' + actionText + '</button></td></tr>';
+    }).join("");
+    return '<div class="panel-head"><div><h2>Existing source profiles</h2><p>Browse synthetic profiles and link one to a role.</p></div><span class="pill teal">Source-owned · read-only</span></div>' +
+      '<div class="notice"><span>i</span><div><strong>No profile entry or editing.</strong> If a prior application passed screening, reached Final interview, and ended Not selected, an Approved HR review is needed before another role application.</div></div>' +
+      '<div class="filters"><input id="profile-search" class="field" type="search" placeholder="Search name, source, or skill" aria-label="Search source profiles" value="' + escapeHtml(profileQuery) + '"><label class="muted" for="profile-role">Role to link</label><select id="profile-role" class="select" aria-label="Role for candidate">' + roleOptions(selectedRole) + '</select></div>' +
+      '<div class="table-box"><table><thead><tr><th>Source profile</th><th>Source channel</th><th>Skills · unscored</th><th>Review status</th><th>Action</th></tr></thead><tbody id="profiles-body">' + rows + '</tbody></table><div id="profiles-empty" class="empty hidden"><strong>No matching profiles</strong>Try another search.</div></div>';
+  }
+  function renderEligibleCard(app) {
+    var person = profile(app.sourceId);
+    return '<article class="card"><div class="card-head"><div><h3>' + escapeHtml(person.name) + '</h3><p class="person-sub">' + escapeHtml(person.id) + ' · ' + escapeHtml(person.source) + '</p></div><span class="pill blue">Eligible · no request yet</span></div>' +
+      '<div class="detail-list"><div class="detail-row"><span class="detail-label">Qualifying application</span><span class="detail-value">' + escapeHtml(app.role + " · " + app.department) + '</span></div><div class="detail-row"><span class="detail-label">Outcome</span><span class="detail-value">' + escapeHtml(app.outcome) + '</span></div></div>' +
+      '<p class="muted" style="font-size:12px"><strong>Eligibility:</strong> Screening passed, Final interview, and Not selected.</p>' + renderHistory(app) +
+      '<div class="card-actions"><button class="btn primary" type="button" data-request-review="' + escapeHtml(app.id) + '">Request HR review</button></div></article>';
+  }
+  function renderReviewCard(review) {
+    var person = profile(review.sourceId);
+    var app = application(review.applicationId);
+    var currentlyEligible = Boolean(app && isEligible(app));
+    var statusClass = review.status === "Approved" ? "green" : review.status === "Not approved" ? "red" : "amber";
+    var statusLabel = review.status + (currentlyEligible ? "" : " · application no longer eligible");
+    var reviewControls = "";
+    if (review.status === "Pending" && currentlyEligible) {
+      reviewControls = '<div class="card-actions"><button class="btn success" type="button" data-review="' + escapeHtml(review.id) + '" data-status="Approved">Approve future consideration</button><button class="btn danger" type="button" data-review="' + escapeHtml(review.id) + '" data-status="Not approved">Do not approve</button></div>';
+    } else if (review.status === "Pending") {
+      reviewControls = '<div class="notice amber"><span>!</span><div>This application no longer meets the review rule. The pending record is retained; HR cannot decide it while ineligible.</div></div>';
+    } else {
+      reviewControls = '<div class="detail-list"><div class="detail-row"><span class="detail-label">Reviewed by</span><span class="detail-value">' + escapeHtml(review.reviewer) + '</span></div><div class="detail-row"><span class="detail-label">Review date</span><span class="detail-value">' + escapeHtml(formatTimestamp(review.reviewedAt)) + '</span></div></div>';
+    }
+    var futureRole = "";
+    if (review.status === "Approved" && currentlyEligible) {
+      var availableRoles = roles.filter(function (role) {
+        return !applications.some(function (existing) { return existing.sourceId === person.id && existing.role === role.name; });
+      });
+      var roleSelect = availableRoles.length
+        ? '<select class="select" data-future-role="' + escapeHtml(review.id) + '" aria-label="Choose a future role">' + availableRoles.map(function (role) {
+          return '<option value="' + escapeHtml(role.name) + '">' + escapeHtml(role.name + " · " + role.department) + '</option>';
+        }).join("") + '</select><button class="btn primary" type="button" data-create-future="' + escapeHtml(review.id) + '">Create separate application</button>'
+        : '<span class="muted">All sample roles already have an application.</span>';
+      futureRole = '<div class="notice"><span>↗</span><div><strong>Approved for human consideration.</strong> Select a role in the same or another department. Prior history stays unchanged.</div></div><div class="card-actions">' + roleSelect + '</div>';
+    }
+    return '<article class="card" data-review-card><div class="card-head"><div><h3>' + escapeHtml(person.name) + '</h3><p class="person-sub">' + escapeHtml(person.id) + ' · ' + escapeHtml(person.source) + '</p></div><span class="pill ' + statusClass + '">' + escapeHtml(statusLabel) + '</span></div>' +
+      '<div class="detail-list"><div class="detail-row"><span class="detail-label">Qualifying application</span><span class="detail-value">' + escapeHtml(app.role + " · " + app.department) + '</span></div><div class="detail-row"><span class="detail-label">Outcome</span><span class="detail-value">' + escapeHtml(app.outcome) + '</span></div></div>' +
+      '<p class="muted" style="font-size:12px"><strong>Review rule:</strong> Screening passed, Final interview, and Not selected.</p>' + renderHistory(app) + reviewControls + futureRole + '</article>';
+  }
+  function renderReviews() {
+    var unrequested = applications.filter(function (app) {
+      return isEligible(app) && !reviewForApplication(app.id);
+    });
+    var cards = reviews.map(renderReviewCard).join("");
+    return '<div class="panel-head"><div><h2>HR future-role review</h2><p>Eligible applications appear as requests only after HR asks for a review.</p></div><span class="pill blue">' + reviews.length + ' requested reviews</span></div>' +
+      '<div class="notice amber"><span>!</span><div><strong>Human decision only.</strong> Eligibility requires Screening passed, Final interview, and Not selected. No score or recommendation is generated. Retention and cross-department sharing still need HR policy approval before real data is used.</div></div>' +
+      (unrequested.length ? '<h2 class="section-heading">Eligible applications · request review</h2><div class="card-grid">' + unrequested.map(renderEligibleCard).join("") + '</div>' : '<div class="empty"><strong>No eligible applications awaiting a request</strong>Request a review from the role pipeline when a qualifying application is ready.</div>') +
+      (cards ? '<h2 class="section-heading">Requested reviews</h2><div class="card-grid">' + cards + '</div>' : '');
+  }
+  function render() {
+    var content = document.getElementById("content");
+    var titles = {
+      pipeline: ["Role pipeline", "Track timestamped progress and outcomes for each role application."],
+      profiles: ["Source profiles", "Find a source profile and create a separate role application."],
+      reviews: ["Reuse review", "Request and record an explicit HR decision for future consideration."]
+    };
+    document.getElementById("page-title").textContent = titles[activeView][0];
+    document.getElementById("page-subtitle").textContent = titles[activeView][1];
+    document.getElementById("crumb-label").textContent = titles[activeView][0];
+    content.innerHTML = activeView === "pipeline" ? renderPipeline() : activeView === "profiles" ? renderProfiles() : renderReviews();
+    Array.prototype.forEach.call(document.querySelectorAll("[data-view]"), function (button) {
+      var active = button.getAttribute("data-view") === activeView;
+      button.classList.toggle("active", active);
+      if (button.getAttribute("role") === "tab") button.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    bindPanelEvents();
+    if (activeView === "pipeline") applyPipelineFilters();
+    if (activeView === "profiles") applyProfileSearch();
+  }
+  function createApplication(sourceId, roleName, qualifyingReviewId) {
+    var person = profile(sourceId);
+    var role = roleForName(roleName);
+    if (!person || !role) return false;
+    if (applications.some(function (app) { return app.sourceId === sourceId && app.role === roleName; })) return false;
+
+    var qualifyingApps = applications.filter(function (app) { return app.sourceId === sourceId && isEligible(app); });
+    if (qualifyingReviewId) {
+      var qualifyingReview = reviews.find(function (item) { return item.id === qualifyingReviewId; });
+      var triggeringApp = qualifyingReview && application(qualifyingReview.applicationId);
+      if (!qualifyingReview || qualifyingReview.status !== "Approved" || !triggeringApp || !isEligible(triggeringApp) || triggeringApp.sourceId !== sourceId) return false;
+    } else if (qualifyingApps.length && !approvedReviewForProfile(sourceId)) {
+      return false;
+    }
+
+    var now = timestampNow();
+    applications.push({
+      id: "APP-" + String(300 + applications.length + 1),
+      sourceId: sourceId,
+      role: role.name,
+      department: role.department,
+      stage: "Added to role",
+      outcome: null,
+      updatedAt: now,
+      stageHistory: [{ stage: "Added to role", reachedAt: now }]
+    });
+    showToast("Created a separate application. The source profile and prior applications were unchanged.");
+    activeView = "pipeline";
+    render();
+    return true;
+  }
+  function requestReview(applicationId) {
+    var app = application(applicationId);
+    if (!app || !isEligible(app) || reviewForApplication(app.id)) return;
+    reviews.push({
+      id: "REV-" + String(200 + reviews.length + 1),
+      sourceId: app.sourceId,
+      applicationId: app.id,
+      status: "Pending",
+      reviewer: null,
+      reviewedAt: null
+    });
+    showToast("HR review requested. No hiring decision was made.");
+    render();
+  }
+  function applyPipelineFilters() {
+    var body = document.getElementById("pipeline-body");
+    if (!body) return;
+    var visible = 0;
+    Array.prototype.forEach.call(body.querySelectorAll("tr"), function (row) {
+      var query = pipelineFilters.query.toLowerCase();
+      var stage = row.querySelector("[data-stage]").value;
+      var outcome = row.querySelector("[data-outcome]").value;
+      var show = row.textContent.toLowerCase().indexOf(query) >= 0 &&
+        (!pipelineFilters.role || row.getAttribute("data-role-filter") === pipelineFilters.role) &&
+        (!pipelineFilters.department || row.getAttribute("data-department-filter") === pipelineFilters.department) &&
+        (!pipelineFilters.stage || stage === pipelineFilters.stage) &&
+        (!pipelineFilters.outcome || outcome === pipelineFilters.outcome);
+      row.classList.toggle("hidden", !show);
+      if (show) visible += 1;
+    });
+    var empty = document.getElementById("pipeline-empty");
+    if (empty) empty.classList.toggle("hidden", visible > 0);
+  }
+  function applyProfileSearch() {
+    var body = document.getElementById("profiles-body");
+    if (!body) return;
+    var query = profileQuery.toLowerCase();
+    var visible = 0;
+    Array.prototype.forEach.call(body.querySelectorAll("tr"), function (row) {
+      var show = row.textContent.toLowerCase().indexOf(query) >= 0;
+      row.classList.toggle("hidden", !show);
+      if (show) visible += 1;
+    });
+    var empty = document.getElementById("profiles-empty");
+    if (empty) empty.classList.toggle("hidden", visible > 0);
+  }
+  function bindPanelEvents() {
+    var profileRole = document.getElementById("profile-role");
+    if (profileRole) profileRole.addEventListener("change", function () {
+      selectedRole = profileRole.value;
+      render();
+    });
+    var profileSearch = document.getElementById("profile-search");
+    if (profileSearch) profileSearch.addEventListener("input", function () {
+      profileQuery = profileSearch.value || "";
+      applyProfileSearch();
+    });
+    var pipelineSearch = document.getElementById("pipeline-search");
+    if (pipelineSearch) pipelineSearch.addEventListener("input", function () {
+      pipelineFilters.query = pipelineSearch.value || "";
+      applyPipelineFilters();
+    });
+    [
+      ["pipeline-role-filter", "role"],
+      ["pipeline-department-filter", "department"],
+      ["pipeline-stage-filter", "stage"],
+      ["pipeline-outcome-filter", "outcome"]
+    ].forEach(function (binding) {
+      var select = document.getElementById(binding[0]);
+      if (select) select.addEventListener("change", function () {
+        pipelineFilters[binding[1]] = select.value;
+        applyPipelineFilters();
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-link]"), function (button) {
+      button.addEventListener("click", function () {
+        createApplication(button.getAttribute("data-link"), selectedRole);
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-request-review]"), function (button) {
+      button.addEventListener("click", function () {
+        requestReview(button.getAttribute("data-request-review"));
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-stage]"), function (select) {
+      select.addEventListener("change", function () {
+        var app = application(select.getAttribute("data-stage"));
+        if (!app || app.stage === select.value) return;
+        var now = timestampNow();
+        app.stage = select.value;
+        app.stageHistory.push({ stage: select.value, reachedAt: now });
+        app.updatedAt = now;
+        render();
+        showToast("Stage history updated with the time reached.");
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-outcome]"), function (select) {
+      select.addEventListener("change", function () {
+        var app = application(select.getAttribute("data-outcome"));
+        if (!app) return;
+        app.outcome = select.value || null;
+        app.updatedAt = timestampNow();
+        render();
+        showToast("Outcome updated separately from stage history.");
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-review]"), function (button) {
+      button.addEventListener("click", function () {
+        var review = reviews.find(function (item) { return item.id === button.getAttribute("data-review"); });
+        var app = review && application(review.applicationId);
+        if (!review || review.status !== "Pending" || !app || !isEligible(app)) return;
+        review.status = button.getAttribute("data-status");
+        review.reviewer = "HR demo user";
+        review.reviewedAt = timestampNow();
+        render();
+        showToast("HR future-role review recorded. No hiring decision was made.");
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-create-future]"), function (button) {
+      button.addEventListener("click", function () {
+        var review = reviews.find(function (item) { return item.id === button.getAttribute("data-create-future"); });
+        var select = document.querySelector('[data-future-role="' + button.getAttribute("data-create-future") + '"]');
+        if (!review || review.status !== "Approved" || !select) return;
+        createApplication(review.sourceId, select.value, review.id);
+      });
+    });
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll("[data-view]"), function (button) {
+    button.addEventListener("click", function () {
+      activeView = button.getAttribute("data-view");
+      render();
+    });
+  });
+  render();
+}());
+</script>
+</body>
+</html>
