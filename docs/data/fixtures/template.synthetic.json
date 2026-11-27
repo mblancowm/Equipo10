@@ -1,76 +1,118 @@
 {
   "syntheticOnly": true,
-  "notice": "Every record is fabricated. sourceChannel, skills, role, stage, and outcome values are illustrative; stage and outcome labels are not approved enums or a state machine.",
+  "notice": "Every record is fabricated. Stage and outcome values use the working MVP vocabulary. Skills are descriptive and unscored. Future-role reviews are human decisions; this fixture does not implement authentication or retention policy.",
   "candidateProfiles": [
     {
       "candidateId": "candidate-sample-001",
       "sourceChannel": "Referral",
-      "skills": ["SQL", "Reporting"]
+      "skills": [
+        "SQL",
+        "Reporting"
+      ]
     },
     {
       "candidateId": "candidate-sample-002",
       "sourceChannel": "Other",
-      "skills": ["Python", "Data modeling"]
+      "skills": [
+        "Python",
+        "Data modeling"
+      ]
     },
     {
       "candidateId": "candidate-sample-003",
       "sourceChannel": "Career fair",
-      "skills": ["ETL", "Cloud data platforms"]
+      "skills": [
+        "ETL",
+        "Cloud data platforms"
+      ]
     },
     {
       "candidateId": "candidate-sample-004",
       "sourceChannel": "Recruiter sourcing",
-      "skills": ["Dashboard design", "SQL"]
+      "skills": [
+        "Dashboard design",
+        "SQL"
+      ]
     },
     {
       "candidateId": "candidate-sample-005",
       "sourceChannel": "Referral",
-      "skills": ["Python", "Statistics"]
+      "skills": [
+        "Python",
+        "Statistics"
+      ]
     },
     {
       "candidateId": "candidate-sample-006",
       "sourceChannel": "Other",
-      "skills": ["Data quality", "dbt"]
+      "skills": [
+        "Data quality",
+        "dbt"
+      ]
     },
     {
       "candidateId": "candidate-sample-007",
       "sourceChannel": "University program",
-      "skills": ["Java", "Data pipelines"]
+      "skills": [
+        "Java",
+        "Data pipelines"
+      ]
     },
     {
       "candidateId": "candidate-sample-008",
       "sourceChannel": "Referral",
-      "skills": ["Product analytics", "SQL"]
+      "skills": [
+        "Product analytics",
+        "SQL"
+      ]
     },
     {
       "candidateId": "candidate-sample-009",
       "sourceChannel": "Other",
-      "skills": ["Cloud infrastructure", "Python"]
+      "skills": [
+        "Cloud infrastructure",
+        "Python"
+      ]
     },
     {
       "candidateId": "candidate-sample-010",
       "sourceChannel": "Career fair",
-      "skills": ["Data visualization", "Excel"]
+      "skills": [
+        "Data visualization",
+        "Excel"
+      ]
     },
     {
       "candidateId": "candidate-sample-011",
       "sourceChannel": "Recruiter sourcing",
-      "skills": ["Machine learning", "Python"]
+      "skills": [
+        "Machine learning",
+        "Python"
+      ]
     },
     {
       "candidateId": "candidate-sample-012",
       "sourceChannel": "Other",
-      "skills": ["Data governance", "SQL"]
+      "skills": [
+        "Data governance",
+        "SQL"
+      ]
     },
     {
       "candidateId": "candidate-sample-013",
       "sourceChannel": "Referral",
-      "skills": ["Business analysis", "Reporting"]
+      "skills": [
+        "Business analysis",
+        "Reporting"
+      ]
     },
     {
       "candidateId": "candidate-sample-014",
       "sourceChannel": "Alumni network",
-      "skills": ["API design", "TypeScript"]
+      "skills": [
+        "API design",
+        "TypeScript"
+      ]
     },
     {
       "candidateId": "candidate-sample-015",
@@ -82,121 +124,503 @@
       "applicationId": "application-sample-001",
       "candidateId": "candidate-sample-001",
       "role": "Data Analyst",
+      "department": "Analytics",
       "stage": "Interview",
+      "stageHistory": [
+        {
+          "stage": "Added to role",
+          "reachedAt": "2026-02-01T09:00:00Z"
+        },
+        {
+          "stage": "Initial screening",
+          "reachedAt": "2026-02-01T11:00:00Z"
+        },
+        {
+          "stage": "Screening passed",
+          "reachedAt": "2026-02-01T13:00:00Z"
+        },
+        {
+          "stage": "Interview",
+          "reachedAt": "2026-02-01T15:00:00Z"
+        }
+      ],
       "outcome": null,
-      "updatedAt": "2026-01-15T10:00:00Z"
+      "updatedAt": "2026-02-01T15:00:00Z"
     },
     {
       "applicationId": "application-sample-002",
       "candidateId": "candidate-sample-001",
       "role": "Analytics Consultant",
+      "department": "Consulting",
       "stage": "Decision",
+      "stageHistory": [
+        {
+          "stage": "Added to role",
+          "reachedAt": "2026-02-03T09:00:00Z"
+        },
+        {
+          "stage": "Initial screening",
+          "reachedAt": "2026-02-03T11:00:00Z"
+        },
+        {
+          "stage": "Screening passed",
+          "reachedAt": "2026-02-03T13:00:00Z"
+        },
+        {
+          "stage": "Interview",
+          "reachedAt": "2026-02-03T15:00:00Z"
+        },
+        {
+          "stage": "Final interview",
+          "reachedAt": "2026-02-03T17:00:00Z"
+        },
+        {
+          "stage": "Decision",
+          "reachedAt": "2026-02-03T19:00:00Z"
+        }
+      ],
       "outcome": "Selected",
-      "updatedAt": "2026-01-16T13:00:00Z"
+      "updatedAt": "2026-02-03T19:00:00Z"
     },
     {
       "applicationId": "application-sample-003",
       "candidateId": "candidate-sample-002",
       "role": "Data Engineer",
+      "department": "Technology",
       "stage": "Decision",
+      "stageHistory": [
+        {
+          "stage": "Added to role",
+          "reachedAt": "2026-02-05T09:00:00Z"
+        },
+        {
+          "stage": "Initial screening",
+          "reachedAt": "2026-02-05T11:00:00Z"
+        },
+        {
+          "stage": "Screening passed",
+          "reachedAt": "2026-02-05T13:00:00Z"
+        },
+        {
+          "stage": "Interview",
+          "reachedAt": "2026-02-05T15:00:00Z"
+        },
+        {
+          "stage": "Final interview",
+          "reachedAt": "2026-02-05T17:00:00Z"
+        },
+        {
+          "stage": "Decision",
+          "reachedAt": "2026-02-05T19:00:00Z"
+        }
+      ],
       "outcome": "Not selected",
-      "updatedAt": "2026-01-17T09:30:00Z"
+      "updatedAt": "2026-02-05T19:00:00Z"
     },
     {
       "applicationId": "application-sample-004",
       "candidateId": "candidate-sample-003",
       "role": "Data Engineer",
-      "stage": "Screening",
+      "department": "Technology",
+      "stage": "Initial screening",
+      "stageHistory": [
+        {
+          "stage": "Added to role",
+          "reachedAt": "2026-02-07T09:00:00Z"
+        },
+        {
+          "stage": "Initial screening",
+          "reachedAt": "2026-02-07T11:00:00Z"
+        }
+      ],
       "outcome": null,
-      "updatedAt": "2026-01-18T11:15:00Z"
+      "updatedAt": "2026-02-07T11:00:00Z"
     },
     {
       "applicationId": "application-sample-005",
       "candidateId": "candidate-sample-004",
       "role": "Data Analyst",
+      "department": "Analytics",
       "stage": "Decision",
+      "stageHistory": [
+        {
+          "stage": "Added to role",
+          "reachedAt": "2026-02-09T09:00:00Z"
+        },
+        {
+          "stage": "Initial screening",
+          "reachedAt": "2026-02-09T11:00:00Z"
+        },
+        {
+          "stage": "Screening passed",
+          "reachedAt": "2026-02-09T13:00:00Z"
+        },
+        {
+          "stage": "Interview",
+          "reachedAt": "2026-02-09T15:00:00Z"
+        },
+        {
+          "stage": "Final interview",
+          "reachedAt": "2026-02-09T17:00:00Z"
+        },
+        {
+          "stage": "Decision",
+          "reachedAt": "2026-02-09T19:00:00Z"
+        }
+      ],
       "outcome": "Selected",
-      "updatedAt": "2026-01-19T14:00:00Z"
+      "updatedAt": "2026-02-09T19:00:00Z"
     },
     {
       "applicationId": "application-sample-006",
       "candidateId": "candidate-sample-005",
       "role": "Analytics Consultant",
-      "stage": "Interview",
+      "department": "Consulting",
+      "stage": "Final interview",
+      "stageHistory": [
+        {
+          "stage": "Added to role",
+          "reachedAt": "2026-02-11T09:00:00Z"
+        },
+        {
+          "stage": "Initial screening",
+          "reachedAt": "2026-02-11T11:00:00Z"
+        },
+        {
+          "stage": "Screening passed",
+          "reachedAt": "2026-02-11T13:00:00Z"
+        },
+        {
+          "stage": "Interview",
+          "reachedAt": "2026-02-11T15:00:00Z"
+        },
+        {
+          "stage": "Final interview",
+          "reachedAt": "2026-02-11T17:00:00Z"
+        }
+      ],
       "outcome": null,
-      "updatedAt": "2026-01-20T09:45:00Z"
+      "updatedAt": "2026-02-11T17:00:00Z"
     },
     {
       "applicationId": "application-sample-007",
       "candidateId": "candidate-sample-006",
       "role": "Data Quality Analyst",
+      "department": "Data Operations",
       "stage": "Decision",
+      "stageHistory": [
+        {
+          "stage": "Added to role",
+          "reachedAt": "2026-02-13T09:00:00Z"
+        },
+        {
+          "stage": "Initial screening",
+          "reachedAt": "2026-02-13T11:00:00Z"
+        },
+        {
+          "stage": "Screening passed",
+          "reachedAt": "2026-02-13T13:00:00Z"
+        },
+        {
+          "stage": "Interview",
+          "reachedAt": "2026-02-13T15:00:00Z"
+        },
+        {
+          "stage": "Final interview",
+          "reachedAt": "2026-02-13T17:00:00Z"
+        },
+        {
+          "stage": "Decision",
+          "reachedAt": "2026-02-13T19:00:00Z"
+        }
+      ],
       "outcome": "Not selected",
-      "updatedAt": "2026-01-21T16:20:00Z"
+      "updatedAt": "2026-02-13T19:00:00Z"
     },
     {
       "applicationId": "application-sample-008",
       "candidateId": "candidate-sample-007",
       "role": "Data Engineer",
+      "department": "Technology",
       "stage": "Added to role",
+      "stageHistory": [
+        {
+          "stage": "Added to role",
+          "reachedAt": "2026-02-15T09:00:00Z"
+        }
+      ],
       "outcome": null,
-      "updatedAt": "2026-01-22T08:30:00Z"
+      "updatedAt": "2026-02-15T09:00:00Z"
     },
     {
       "applicationId": "application-sample-009",
       "candidateId": "candidate-sample-008",
       "role": "Product Analyst",
+      "department": "Product",
       "stage": "Decision",
+      "stageHistory": [
+        {
+          "stage": "Added to role",
+          "reachedAt": "2026-02-17T09:00:00Z"
+        },
+        {
+          "stage": "Initial screening",
+          "reachedAt": "2026-02-17T11:00:00Z"
+        },
+        {
+          "stage": "Screening passed",
+          "reachedAt": "2026-02-17T13:00:00Z"
+        },
+        {
+          "stage": "Interview",
+          "reachedAt": "2026-02-17T15:00:00Z"
+        },
+        {
+          "stage": "Final interview",
+          "reachedAt": "2026-02-17T17:00:00Z"
+        },
+        {
+          "stage": "Decision",
+          "reachedAt": "2026-02-17T19:00:00Z"
+        }
+      ],
       "outcome": "Selected",
-      "updatedAt": "2026-01-23T12:10:00Z"
+      "updatedAt": "2026-02-17T19:00:00Z"
     },
     {
       "applicationId": "application-sample-010",
       "candidateId": "candidate-sample-009",
       "role": "Cloud Data Engineer",
-      "stage": "Screening",
+      "department": "Technology",
+      "stage": "Screening passed",
+      "stageHistory": [
+        {
+          "stage": "Added to role",
+          "reachedAt": "2026-02-19T09:00:00Z"
+        },
+        {
+          "stage": "Initial screening",
+          "reachedAt": "2026-02-19T11:00:00Z"
+        },
+        {
+          "stage": "Screening passed",
+          "reachedAt": "2026-02-19T13:00:00Z"
+        }
+      ],
       "outcome": null,
-      "updatedAt": "2026-01-24T10:05:00Z"
+      "updatedAt": "2026-02-19T13:00:00Z"
     },
     {
       "applicationId": "application-sample-011",
       "candidateId": "candidate-sample-010",
       "role": "Reporting Analyst",
+      "department": "Analytics",
       "stage": "Decision",
+      "stageHistory": [
+        {
+          "stage": "Added to role",
+          "reachedAt": "2026-02-21T09:00:00Z"
+        },
+        {
+          "stage": "Initial screening",
+          "reachedAt": "2026-02-21T11:00:00Z"
+        },
+        {
+          "stage": "Screening passed",
+          "reachedAt": "2026-02-21T13:00:00Z"
+        },
+        {
+          "stage": "Interview",
+          "reachedAt": "2026-02-21T15:00:00Z"
+        },
+        {
+          "stage": "Final interview",
+          "reachedAt": "2026-02-21T17:00:00Z"
+        },
+        {
+          "stage": "Decision",
+          "reachedAt": "2026-02-21T19:00:00Z"
+        }
+      ],
       "outcome": "Not selected",
-      "updatedAt": "2026-01-25T15:40:00Z"
+      "updatedAt": "2026-02-21T19:00:00Z"
     },
     {
       "applicationId": "application-sample-012",
       "candidateId": "candidate-sample-011",
       "role": "Analytics Consultant",
+      "department": "Consulting",
       "stage": "Interview",
-      "outcome": null,
-      "updatedAt": "2026-01-26T13:25:00Z"
+      "stageHistory": [
+        {
+          "stage": "Added to role",
+          "reachedAt": "2026-02-23T09:00:00Z"
+        },
+        {
+          "stage": "Initial screening",
+          "reachedAt": "2026-02-23T11:00:00Z"
+        },
+        {
+          "stage": "Screening passed",
+          "reachedAt": "2026-02-23T13:00:00Z"
+        },
+        {
+          "stage": "Interview",
+          "reachedAt": "2026-02-23T15:00:00Z"
+        }
+      ],
+      "outcome": "Withdrawn",
+      "updatedAt": "2026-02-23T15:00:00Z"
     },
     {
       "applicationId": "application-sample-013",
       "candidateId": "candidate-sample-012",
       "role": "Data Governance Analyst",
+      "department": "Risk",
       "stage": "Decision",
+      "stageHistory": [
+        {
+          "stage": "Added to role",
+          "reachedAt": "2026-02-25T09:00:00Z"
+        },
+        {
+          "stage": "Initial screening",
+          "reachedAt": "2026-02-25T11:00:00Z"
+        },
+        {
+          "stage": "Screening passed",
+          "reachedAt": "2026-02-25T13:00:00Z"
+        },
+        {
+          "stage": "Interview",
+          "reachedAt": "2026-02-25T15:00:00Z"
+        },
+        {
+          "stage": "Final interview",
+          "reachedAt": "2026-02-25T17:00:00Z"
+        },
+        {
+          "stage": "Decision",
+          "reachedAt": "2026-02-25T19:00:00Z"
+        }
+      ],
       "outcome": "Selected",
-      "updatedAt": "2026-01-27T09:00:00Z"
+      "updatedAt": "2026-02-25T19:00:00Z"
     },
     {
       "applicationId": "application-sample-014",
       "candidateId": "candidate-sample-013",
       "role": "Business Analyst",
-      "stage": "Screening",
-      "outcome": null,
-      "updatedAt": "2026-01-28T11:50:00Z"
+      "department": "Consulting",
+      "stage": "Decision",
+      "stageHistory": [
+        {
+          "stage": "Added to role",
+          "reachedAt": "2026-02-27T09:00:00Z"
+        },
+        {
+          "stage": "Initial screening",
+          "reachedAt": "2026-02-27T11:00:00Z"
+        },
+        {
+          "stage": "Screening passed",
+          "reachedAt": "2026-02-27T13:00:00Z"
+        },
+        {
+          "stage": "Interview",
+          "reachedAt": "2026-02-27T15:00:00Z"
+        },
+        {
+          "stage": "Decision",
+          "reachedAt": "2026-02-27T17:00:00Z"
+        }
+      ],
+      "outcome": "Not selected",
+      "updatedAt": "2026-02-27T17:00:00Z"
     },
     {
       "applicationId": "application-sample-015",
       "candidateId": "candidate-sample-014",
       "role": "API Developer",
+      "department": "Technology",
       "stage": "Decision",
+      "stageHistory": [
+        {
+          "stage": "Added to role",
+          "reachedAt": "2026-03-01T09:00:00Z"
+        },
+        {
+          "stage": "Initial screening",
+          "reachedAt": "2026-03-01T11:00:00Z"
+        },
+        {
+          "stage": "Screening passed",
+          "reachedAt": "2026-03-01T13:00:00Z"
+        },
+        {
+          "stage": "Interview",
+          "reachedAt": "2026-03-01T15:00:00Z"
+        },
+        {
+          "stage": "Final interview",
+          "reachedAt": "2026-03-01T17:00:00Z"
+        },
+        {
+          "stage": "Decision",
+          "reachedAt": "2026-03-01T19:00:00Z"
+        }
+      ],
       "outcome": "Not selected",
-      "updatedAt": "2026-01-29T17:05:00Z"
+      "updatedAt": "2026-03-01T19:00:00Z"
+    },
+    {
+      "applicationId": "application-sample-016",
+      "candidateId": "candidate-sample-006",
+      "role": "Business Analyst",
+      "department": "Consulting",
+      "stage": "Added to role",
+      "stageHistory": [
+        {
+          "stage": "Added to role",
+          "reachedAt": "2026-03-03T09:00:00Z"
+        }
+      ],
+      "outcome": null,
+      "updatedAt": "2026-03-03T09:00:00Z"
+    }
+  ],
+  "futureRoleReviews": [
+    {
+      "reviewId": "reuse-review-sample-001",
+      "candidateId": "candidate-sample-002",
+      "triggeringApplicationId": "application-sample-003",
+      "status": "Pending",
+      "reviewerId": null,
+      "reviewedAt": null
+    },
+    {
+      "reviewId": "reuse-review-sample-002",
+      "candidateId": "candidate-sample-006",
+      "triggeringApplicationId": "application-sample-007",
+      "status": "Approved",
+      "reviewerId": "hr-user-sample-001",
+      "reviewedAt": "2026-02-14T12:00:00Z"
+    },
+    {
+      "reviewId": "reuse-review-sample-003",
+      "candidateId": "candidate-sample-010",
+      "triggeringApplicationId": "application-sample-011",
+      "status": "Not approved",
+      "reviewerId": "hr-user-sample-001",
+      "reviewedAt": "2026-02-16T12:00:00Z"
+    },
+    {
+      "reviewId": "reuse-review-sample-004",
+      "candidateId": "candidate-sample-014",
+      "triggeringApplicationId": "application-sample-015",
+      "status": "Pending",
+      "reviewerId": null,
+      "reviewedAt": null
     }
   ]
 }

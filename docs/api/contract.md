@@ -2,173 +2,33 @@
 
 ## Status
 
-This is a **draft for Frontend, Backend/API, Data, and QA review**. It describes the first proposed recruiter flow using the conceptual model and synthetic fixture. It does not approve authentication, persistence, production access, or final stage and outcome values.
+The API currently implements only GET /api/health. Candidate operations below are proposed. Shared Zod schemas in packages/contracts define the working stage, outcome, application, stage-history, and review fields used by the synthetic seed.
 
-The profile and application fields align with [`docs/data/model.md`](../data/model.md). All examples use synthetic identifiers and data.
+## Working payloads
 
-## Implemented: Health Check
+CandidateProfile has candidateId, sourceChannel, and optional unscored skills.
 
-- **Method and path:** `GET /api/health`
-- **Request:** no body.
-- **Success:** `200`, `{ "status": "ok" }`.
-- **Implementation:** `apps/api/src/routes/health.ts`.
+RoleApplication has applicationId, candidateId, role, department, stage, stageHistory, outcome, and updatedAt. Each stageHistory event contains a valid stage and reachedAt timestamp. Outcomes are Selected, Not selected, Withdrawn, or null.
 
-## Proposed Operations
+FutureRoleReview has reviewId, candidateId, triggeringApplicationId, status, reviewerId, and reviewedAt. Pending requires a null reviewer and timestamp. Approved and Not approved require both.
 
-### Read a candidate profile
+## Proposed operations
 
-`GET /api/candidate-profiles/{candidateId}`
+- GET /api/candidate-profiles/{candidateId}: return an existing source profile read-only.
+- GET /api/role-applications?role=&department=&stage=&outcome=: list applications with optional exact-match filters and linked read-only profile.
+- POST /api/role-applications: accept candidateId, role, and department; create a separate application at Added to role with a first stage-history event and null outcome.
+- PATCH /api/role-applications/{applicationId}: accept a stage, an outcome, or both. A stage change appends an event; an outcome change remains separate.
+- POST /api/candidate-profiles/{candidateId}/reuse-reviews: accept triggeringApplicationId and create a Pending review only if that application's history includes Screening passed and Final interview and its outcome is Not selected.
+- PATCH /api/reuse-reviews/{reviewId}: accept Approved or Not approved. In a real authenticated service, reviewerId comes from the HR SSO identity and is not accepted from the client.
 
-Returns the existing profile without changing it. The current model supports lookup by `candidateId`; it has no approved name, email, or free-text search fields.
+After an Approved review, HR may create a new role application in the same or another department. The prior application and review remain unchanged.
 
-**Success — `200`**
+## Validation and errors
 
-```json
-{
-  "data": {
-    "candidateId": "candidate-sample-001",
-    "sourceChannel": "Referral",
-    "skills": ["SQL", "Reporting"]
-  }
-}
-```
+- Validate requests and responses against packages/contracts.
+- Return 400 VALIDATION_ERROR for invalid data, 404 NOT_FOUND for missing records, and 500 INTERNAL_ERROR for unexpected failures.
+- The database seed additionally checks that every fixture review refers to a same-candidate application that passed screening, reached Final interview, and ended Not selected.
 
-**Not found — `404`**
+## Not implemented
 
-```json
-{
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "Candidate profile not found"
-  }
-}
-```
-
-### List role applications for the pipeline
-
-`GET /api/role-applications?role={role}&stage={stage}`
-
-Both query parameters are optional exact-match filters. With no filters, the response contains all applications. Each row includes its read-only candidate profile so the pipeline can display the linked profile, role, stage, and outcome together.
-
-**Success — `200`**
-
-```json
-{
-  "data": [
-    {
-      "applicationId": "application-sample-001",
-      "candidateId": "candidate-sample-001",
-      "role": "Data Analyst",
-      "stage": "Interview",
-      "outcome": null,
-      "updatedAt": "2026-01-15T10:00:00Z",
-      "candidateProfile": {
-        "candidateId": "candidate-sample-001",
-        "sourceChannel": "Referral",
-        "skills": ["SQL", "Reporting"]
-      }
-    }
-  ]
-}
-```
-
-The draft omits pagination because the fixture is small. Agree on pagination and ordering before using this operation with a larger data set.
-
-### Create a role application
-
-`POST /api/role-applications`
-
-Creates an application for an existing profile. The profile remains unchanged. The request supplies the initial `stage` because the model requires one and no default stage has been agreed. The draft has the API assign `applicationId` and `updatedAt`, and initialize `outcome` to `null`.
-
-**Request**
-
-```json
-{
-  "candidateId": "candidate-sample-002",
-  "role": "Data Engineer",
-  "stage": "Screening"
-}
-```
-
-**Success — `201`**
-
-```json
-{
-  "data": {
-    "applicationId": "application-sample-004",
-    "candidateId": "candidate-sample-002",
-    "role": "Data Engineer",
-    "stage": "Screening",
-    "outcome": null,
-    "updatedAt": "2026-01-18T12:00:00Z"
-  }
-}
-```
-
-**Invalid request — `400`**
-
-```json
-{
-  "candidateId": "candidate-sample-002",
-  "role": "Data Engineer",
-  "stage": ""
-}
-```
-
-```json
-{
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Request validation failed",
-    "issues": [
-      { "path": ["stage"], "message": "Must be a non-empty string" }
-    ]
-  }
-}
-```
-
-For this example, the request contains an empty `stage`. Clients should branch on the error `code` and issue `path`; the message is for display.
-
-**Candidate profile not found — `404`** uses the `NOT_FOUND` error shape above.
-
-### Update a role application's stage or outcome
-
-`PATCH /api/role-applications/{applicationId}`
-
-Updates only the specified application. At least one of `stage` or `outcome` is required. `outcome: null` clears a previously recorded outcome. The API updates `updatedAt`.
-
-**Request**
-
-```json
-{
-  "stage": "Decision",
-  "outcome": "Selected"
-}
-```
-
-**Success — `200`** returns `{ "data": <updated role application> }` using the application shape shown above.
-
-**Invalid request — `400`** uses the `VALIDATION_ERROR` shape above. **Application not found — `404`** uses the `NOT_FOUND` shape.
-
-## Shared Validation and Types
-
-`packages/contracts/src/index.ts` is the source of shared Zod schemas and inferred TypeScript types for these payloads.
-
-- Required descriptive strings must be non-empty.
-- `skills` is optional; when present, it is an array of descriptive strings without ratings.
-- `stage`, `outcome`, `role`, and `sourceChannel` remain strings. Example values are not enums, transition rules, or eligibility criteria.
-- `updatedAt` is an ISO 8601 UTC timestamp.
-- API errors use `{ "error": { "code", "message", "issues?" } }`. Validation issues include a field path and message.
-- A missing candidate or application returns `404`; invalid request data returns `400`.
-- An unexpected server failure returns `500` with code `INTERNAL_ERROR`.
-
-## Decisions for Review
-
-1. Confirm these routes, methods, response envelopes, and status codes with Frontend, Data, and QA.
-2. Confirm that the API generates application IDs and update timestamps.
-3. Define authentication, authorization, and which profile fields each user may read. This draft does not imply unauthenticated access.
-4. Decide whether candidate lookup needs search fields beyond the synthetic `candidateId`.
-5. Agree on stage and outcome vocabularies and any transition rules before enforcing them.
-6. Choose persistence and the SQL driver separately before implementing database connections or migrations.
-
-Candidate reuse, ranking, automated evaluation, external recruiting-system integration, and real candidate data are outside this contract draft.
+No candidate CRUD, role CRUD, authentication, SSO mapping, API database routes, source-system integration, or production access controls are implemented. The SQLite migration/seed is local training infrastructure only. Do not use real candidate data.

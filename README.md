@@ -1,46 +1,40 @@
 # Team 10 · Candidate Pipeline
 
-An application for tracking candidates who have participated in interviews, whether referred or sourced through another channel, across roles and hiring waves. Recruiters can link an existing profile to a role and record the stage and outcome of that role-specific application. Integration with the existing recruiting source is not part of the current setup.
+Candidate Pipeline is a training MVP concept for HR to track role-specific hiring history and review finalists for future opportunities. The same person can have separate applications across departments. Profiles remain read-only references to the upstream source.
+
+## Current implementation status
+
+- The repository includes a local SQLite database, Drizzle schema, versioned migrations, and a deterministic synthetic fixture.
+- Migration 0002 adds application department and stage history, and creates future-role review records.
+- The API currently implements only the health check. Candidate operations and frontend/database connection remain to be built.
+- SQLite is for local training data; SSO and production access/retention policy are not implemented.
 
 ## Quick start
 
-Install Bun, then run these commands from the repository root:
+Install Bun and run from the repository root:
 
-```sh
-bun install
-bun run dev
-```
+    bun install
+    bun run dev
 
-The API and web development servers start together. To run one workspace:
+Run one workspace:
 
-```sh
-bun run dev:api
-bun run dev:web
-```
+    bun run dev:api
+    bun run dev:web
 
-Create or update the local SQLite database and load the deterministic synthetic fixture:
+Create or update the local SQLite database and seed synthetic data:
 
-```sh
-bun run --filter @equipo10/api db:setup
-```
+    bun run --filter @equipo10/api db:setup
 
-The database defaults to `data/equipo10.sqlite` and is ignored by Git. Set `DATABASE_PATH` to use another location. To reapply only unapplied schema changes or rerun the fixture seed separately:
-
-```sh
-bun run --filter @equipo10/api db:migrate
-bun run --filter @equipo10/api db:seed
-```
+The database defaults to data/equipo10.sqlite and is ignored by Git. Set DATABASE_PATH to use another location. The seed upserts fixture records; it does not delete records removed from a later fixture revision.
 
 Check TypeScript:
 
-```sh
-bun run typecheck
-```
+    bun run typecheck
 
-## Workspaces
+## MVP data rules
 
-- `apps/api`: Bun + Hono API; Drizzle ORM with Bun's built-in SQLite driver.
-- `apps/web`: React + Vike (`vike-react`).
-- `packages/contracts`: shared Zod schemas and types.
+Working stages: Added to role, Initial screening, Screening passed, Interview, Final interview, Decision.
 
-All candidate records in this repository must be synthetic. Candidate reuse rules, skill interpretation, hiring-manager access, and source-system integration remain open. See [AGENTS.md](AGENTS.md), the [product brief](docs/product/brief.md), the [screen flow](docs/product/screen-flow.md), and the [project plan](docs/requirements-and-plan.md).
+Working outcomes: Selected, Not selected, Withdrawn, or null until entered.
+
+Only a human HR review may approve future consideration after Final interview and Not selected. A new role creates a separate application. The training sample is fabricated and unscored. See docs/data/model.md and docs/qa/acceptance.md.

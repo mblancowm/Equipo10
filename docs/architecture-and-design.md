@@ -1,45 +1,31 @@
 # Architecture and Design
 
-## Design Status
+## Current state
 
-The repository contains a Bun workspace scaffold with a Hono API, a React + Vike app, and Zod contracts. The API implements only a health check. There is no database connection, Drizzle schema, recruiting integration, or candidate operation.
-
-The profile/application separation below is an initial model suggested by the discussion and prototype. The team should review it before implementing storage.
+The repository has a Bun workspace, Hono health-check API, React/Vike frontend, shared Zod contracts, and local SQLite persistence through Drizzle. This proposed change adds application department/history, explicit future-role reviews, and a richer synthetic fixture. Candidate API routes and frontend/database integration are not implemented.
 
 ## Components
 
-- **Web:** React + Vike for reviewing profiles and applications, showing the pipeline, and editing only approved fields.
-- **API:** Bun + Hono for validating and serving agreed operations.
-- **Contracts:** shared Zod schemas to align forms, API payloads, types, and verification.
-- **Data:** Drizzle ORM over SQL; the driver is undecided. Version migrations before changing the schema.
-- **Source systems:** outside the first vertical. The prototype represents existing profiles without connecting to an external system.
+- Web: React + Vike; current demo remains local state and has not been aligned with the selected HR workflow.
+- API: Bun + Hono; currently exposes the health check only.
+- Contracts: shared Zod schemas for profiles, applications, stage history, and future-role reviews.
+- Data: Drizzle over Bun SQLite for the local training MVP. Migration 0001 creates profiles/applications; 0002 adds application department/history and the future-role review table.
+- Source system: owns candidate profiles; connection and synchronization are not implemented.
 
-## Proposed Data Flow
+## Data flow
 
-`Web → API → SQL`
+The planned flow is Web → API → SQLite. A profile is a read-only source reference. Each role application contains its own department, stage history, and outcome. A future-role review references the same candidate and a qualifying prior application.
 
-A profile identifies a person and retains source data. An application links that profile to a role and contains the stage, outcome, and summary for that process. A person may have multiple applications. Updating an application must not overwrite the source profile.
+A review is eligible only when the prior application passed screening, reached Final interview, and has outcome Not selected. HR's explicit Approved decision enables consideration for a future role; it is not an automated ranking or selection. A future role is a new application.
 
-A future search for reusable profiles could query prior applications and skills evidence for human review. The criteria are undefined and must not be implemented from the HTML's demo filter.
+## Access and security
 
-## Screen Flow
+The intended persona is HR/recruiting with company SSO, which is not implemented. There is no admin console or manager access in the working MVP. The fixture's reviewer ID is synthetic. Do not store real candidate data before policy approval.
 
-See `docs/product/screen-flow.md`. The first proposed path is to find an existing profile, link it to a role, and update that application's stage and outcome.
+## Technical boundary
 
-## Contracts and Model
+SQLite is for a local training database. Production hosting, backup/recovery, SSO, retention, consent, and department-sharing controls are not covered by these migrations.
 
-- The current API contract documents only `GET /api/health`.
-- Candidate and application routes have not been approved.
-- `docs/data/model.md` describes candidate entities for review, not an approved database schema.
-- Keep `packages/contracts/src/index.ts` aligned with any operation the team approves.
+## Next implementation step
 
-## Technical Decisions
-
-- Approved foundation: Bun, Hono, React, strict TypeScript, Vike, Drizzle, and Zod.
-- Pending: SQL driver and database/migration configuration.
-- No AI provider or product AI feature is approved. The prototype does not establish automated evaluation.
-- Authentication and real authorization are undefined; role selectors in the prototype only switch demo views.
-
-## Cross-Focus Review
-
-Before implementing an operation, agree on behavior, fields, permissions, and acceptance criteria across Frontend, Backend/API, Data, and QA. Review synthetic-data handling and the effect on the global profile versus each role application.
+Add and test one API operation over this schema, then connect one frontend flow. Keep the contract, model, acceptance criteria, migration, and fixture aligned.
