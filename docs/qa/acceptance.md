@@ -1,48 +1,57 @@
 # Acceptance Criteria
 
-These criteria describe the first vertical proposed by the prototype. The team should confirm them and complete the access criteria before turning them into implementation work.
+These criteria define the working training-MVP flow. Fixtures and tests must use fabricated data only.
 
-## Criterion: Link an Existing Profile to a Role
+## Link an existing source profile
 
-- **Given** a synthetic profile that already appears in the repository
-- **When** recruiting links it to a role
-- **Then** an application is recorded for that profile and role without changing the source profile.
+- Given a profile supplied by the source
+- When an HR user links it to a role and department
+- Then the application starts at Added to role with an initial history event and null outcome.
+- The source profile is unchanged.
 
-## Criterion: Update an Application
+## Record stage and outcome separately
 
-- **Given** a profile with an application for a role
-- **When** recruiting records a stage or outcome change
-- **Then** the change is reflected on that application and does not change the same profile's applications for other roles.
+- Given a role application
+- When HR updates its stage
+- Then the current stage changes and a timestamped event is appended to that application's history.
+- When HR records an outcome, the outcome changes without changing stage.
+- Valid stages are Added to role, Initial screening, Screening passed, Interview, Final interview, and Decision.
+- Valid outcomes are Selected, Not selected, Withdrawn, and null until entered.
 
-## Criterion: Review the Pipeline
+## Preserve applications across roles
 
-- **Given** synthetic applications for different roles and stages
-- **When** recruiting filters by role or stage
-- **Then** only matching applications appear, with profile, role, stage, and outcome distinguishable.
+- Given a profile with an existing application
+- When HR creates an application for another role, including a role in another department
+- Then the new application has its own stage, history, and outcome, and the prior applications remain unchanged.
 
-## Criterion: Include Interviewed Candidates Without a Referral
+## Create a human reuse review
 
-- **Given** a synthetic profile whose source channel is not a referral and that has interview history
-- **When** recruiting searches profiles or reviews prior applications
-- **Then** that profile appears alongside referred candidates, with role, stage, and outcome history available for human review.
+- Given an application with Screening passed and Final interview in stage history and outcome Not selected
+- When HR requests a future-role review
+- Then a Pending review references the same candidate and qualifying application.
+- Given a Not selected application without both Screening passed and Final interview in its history
+- When the profile is evaluated for the review queue
+- Then no reuse review is created.
+- A Pending review has no reviewer or review timestamp.
 
-## Criterion: Review Reusable Profiles
+## Record HR's review decision
 
-- **Given** a profile that may be relevant to a future role
-- **When** recruiting reviews prior information
-- **Then** the interface presents evidence for human review and does not calculate an automated decision or ranking.
+- Given a Pending reuse review
+- When HR records Approved or Not approved
+- Then the review stores the authenticated reviewer and review time.
+- If Approved, HR may create a separate application for a future role; if Not approved, that review cannot create one.
+- The review does not score, rank, match, or make a hiring decision.
 
-## Cases to Cover When the Flow Is Implemented
+## Data integrity
 
-- Normal profile-linking and update flow.
-- Profile without prior applications and empty filter state.
-- Multiple applications for the same profile across different roles.
-- Invalid input and recoverable API error.
-- Anonymized view and identity controls once access rules are approved.
+- Every role application references an existing profile.
+- Every reuse review references the same candidate as its triggering application.
+- An application can have no more than one reuse-review record.
+- Invalid enum values and invalid reviewer/status combinations are rejected by shared validation or database constraints.
 
-## Verification
+## Deferred integration verification
 
-- **Evidence:** capture screenshots, API responses, or execution results when the flow exists.
-- **Command or procedure:** agree with the team as part of the first increment; the supplied assets contain no execution evidence.
-- **Frontend review:** confirm filters, states, and messages are understandable and support recovery.
-- **Cross-focus review:** confirm each criterion matches scope, screen flow, contract, model, and access decisions.
+- Add operation tests for migration/seed, validation, eligibility, and review updates with the first API implementation.
+- Add a QA test plan mapping these criteria to commands and manual procedures.
+- Record actual commands and results in the implementing PR. No API CRUD operations are implemented yet.
+- Do not use real candidate data until the HR policy owner approves SSO, retention, consent, and cross-department sharing.

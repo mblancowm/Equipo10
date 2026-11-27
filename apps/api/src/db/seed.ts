@@ -1,14 +1,20 @@
 import { resolve } from 'node:path'
 import {
   candidateProfileSchema,
+  futureRoleReviewSchema,
   roleApplicationSchema,
 } from '@equipo10/contracts'
 import { db, sqlite } from './database'
-import { candidateProfiles, roleApplications } from './schema'
+import {
+  candidateProfiles,
+  futureRoleReviews,
+  roleApplications,
+} from './schema'
 
 type Fixture = {
   candidateProfiles: unknown[]
   roleApplications: unknown[]
+  futureRoleReviews?: unknown[]
 }
 
 const fixturePath = resolve(
@@ -22,6 +28,34 @@ const profiles = fixture.candidateProfiles.map((profile) =>
 const applications = fixture.roleApplications.map((application) =>
   roleApplicationSchema.parse(application),
 )
+const reviews = (fixture.futureRoleReviews ?? []).map((review) =>
+  futureRoleReviewSchema.parse(review),
+)
+
+for (const review of reviews) {
+  const triggeringApplication = applications.find(
+    (application) =>
+      application.applicationId === review.triggeringApplicationId,
+  )
+
+  if (
+    !triggeringApplication ||
+    triggeringApplication.candidateId !== review.candidateId ||
+    triggeringApplication.outcome !== 'Not selected' ||
+    !triggeringApplication.stageHistory.some(
+      (event) => event.stage === 'Screening passed',
+    ) ||
+    !triggeringApplication.stageHistory.some(
+      (event) => event.stage === 'Final interview',
+    )
+  ) {
+    throw new Error(
+      'Future-role review ' +
+        review.reviewId +
+        ' must reference the same candidate application that passed screening, reached Final interview, and ended Not selected.',
+    )
+  }
+}
 
 const seedFixture = sqlite.transaction(() => {
   for (const profile of profiles) {
@@ -45,15 +79,42 @@ const seedFixture = sqlite.transaction(() => {
 
   for (const application of applications) {
     db.insert(roleApplications)
-      .values(application)
+      .values({
+        applicationId: application.applicationId,
+        candidateId: application.candidateId,
+        role: application.role,
+        department: application.department,
+        stage: application.stage,
+        stageHistoryJson: JSON.stringify(application.stageHistory),
+        outcome: application.outcome,
+        updatedAt: application.updatedAt,
+      })
       .onConflictDoUpdate({
         target: roleApplications.applicationId,
         set: {
           candidateId: application.candidateId,
           role: application.role,
+          department: application.department,
           stage: application.stage,
+          stageHistoryJson: JSON.stringify(application.stageHistory),
           outcome: application.outcome,
           updatedAt: application.updatedAt,
+        },
+      })
+      .run()
+  }
+
+  for (const review of reviews) {
+    db.insert(futureRoleReviews)
+      .values(review)
+      .onConflictDoUpdate({
+        target: futureRoleReviews.reviewId,
+        set: {
+          candidateId: review.candidateId,
+          triggeringApplicationId: review.triggeringApplicationId,
+          status: review.status,
+          reviewerId: review.reviewerId,
+          reviewedAt: review.reviewedAt,
         },
       })
       .run()
@@ -63,5 +124,11 @@ const seedFixture = sqlite.transaction(() => {
 seedFixture()
 
 console.log(
-  `Seeded ${profiles.length} candidate profiles and ${applications.length} role applications from the synthetic fixture.`,
+  'Seeded ' +
+    profiles.length +
+    ' candidate profiles, ' +
+    applications.length +
+    ' role applications, and ' +
+    reviews.length +
+    ' future-role reviews from the synthetic fixture.',
 )

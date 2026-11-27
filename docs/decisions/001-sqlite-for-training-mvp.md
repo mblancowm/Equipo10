@@ -1,26 +1,26 @@
-# Decision 001: SQLite for the training MVP
+# Decision 001: SQLite for the Training MVP
 
-- Status: Proposed for team review
+- Status: Working choice; confirm with the team
 - Date: 2026-11-20
 
 ## Context
 
-The first persisted workflow contains candidate profiles and role applications. The repository API runs on Bun, already includes Drizzle ORM, and currently has no database driver or deployed multi-instance requirement.
+The training MVP needs a reproducible local store for source-profile references, role applications, stage history, and explicit HR reuse reviews. The API runs on Bun, and Drizzle is already in the workspace. The training repository uses synthetic data only.
 
 ## Decision
 
-Use SQLite through Bun's built-in `bun:sqlite` driver and Drizzle's Bun SQLite adapter for the first training MVP. Keep the database file local and untracked. Create its schema through versioned SQL migrations, and seed it from `docs/data/fixtures/template.synthetic.json`.
+Use SQLite through Bun's built-in bun:sqlite driver and Drizzle for the local training database. Keep the database file untracked. Version schema changes as SQL migrations and seed from docs/data/fixtures/template.synthetic.json.
 
-Persist only `CandidateProfile` and `RoleApplication` in this slice. Store the optional skills summary as JSON text; it remains descriptive, with no ratings or history. Keep stage and outcome as nullable/free-form strings according to the current model.
+The current schema contains CandidateProfile references, RoleApplications, and FutureRoleReviews. Skills remain descriptive JSON text. Application stages, stage history, and outcomes belong to each role process.
 
 ## Consequences
 
-- Teammates can create the same local database with the migration and seed commands without sharing a binary database file.
-- SQLite supports the current small prototype without a separate database service.
-- This does not add API CRUD routes, authentication, SSO mappings, or role-based authorization.
-- User and authorization records remain a discussion fixture until the team agrees on identity mapping and permissions.
-- Revisit the database choice before a hosted multi-instance deployment or if write concurrency and operational needs outgrow a local SQLite file. PostgreSQL would be the likely next option.
+- Teammates can create a local database and load fabricated data without sharing a binary database file.
+- A future-role review requires prior Screening passed and Final interview stages and a Not selected outcome; the seed validates this relationship.
+- The migration adds department and stage history while preserving existing rows, and creates a review table tied to the triggering application.
+- API CRUD, authentication, SSO identity mapping, and authorization are not implemented.
+- This choice does not determine production hosting, backup/recovery, retention, consent, or access policy.
 
-## Review
+## Revisit when
 
-This choice and the persistence scope require team review before merge.
+The project moves to hosted multi-instance use or when concurrency and operational needs exceed a local training database.

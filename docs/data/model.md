@@ -1,52 +1,73 @@
 # Data Model
 
-## Status and scope
+## Status and boundary
 
-This is the conceptual model for the first recruiter workflow: find a candidate profile, link it to a role, and record that role application's current stage and outcome. It is a review draft, not a database schema, API contract, or approved set of enums.
-
-The fixture is the source for this first model and contains synthetic profiles only. An external candidate repository and its identifiers are outside this change.
+This is the working training-MVP data model for review with the team. Use fabricated records only. Candidate profiles are references to source-owned records; this application tracks role-specific process data and HR future-role reviews. It does not replace the recruiting source.
 
 ## CandidateProfile
 
-One synthetic candidate profile. A profile may exist before any role application is created.
-
 | Field | Type | Required | Meaning |
 |---|---|---:|---|
-| `candidateId` | string | Yes | Stable synthetic identifier for the profile. |
-| `sourceChannel` | string | Yes | How the candidate entered the hiring process. `Referral` and `Other` are illustrative values, not a final enum. |
-| `skills` | string array | No | Optional, unscored summary of synthetic skills. It is not assessment evidence or a reuse decision. |
+| candidateId | string | Yes | Stable identifier from the synthetic/source profile |
+| sourceChannel | string | Yes | Referral or another source channel |
+| skills | string array | No | Descriptive, unscored skills |
+
+The training model excludes names, contact details, resumes, and interview notes. Production profile fields require an access and retention review.
 
 ## RoleApplication
 
-One candidate's process for one role. Stage and outcome belong here, not on the shared candidate profile.
+One person's process for one role and department. Keep every application separate, including future roles after an HR approval.
 
 | Field | Type | Required | Meaning |
 |---|---|---:|---|
-| `applicationId` | string | Yes | Stable identifier for this role-specific process. |
-| `candidateId` | string | Yes | Reference to exactly one `CandidateProfile.candidateId`. |
-| `role` | string | Yes | Role label for this process. A separate role catalog is not part of this model. |
-| `stage` | string | Yes | Current stage for this application. Task-sheet labels such as `Added to role`, `Screening`, `Interview`, and `Decision` are examples only. |
-| `outcome` | string or null | Yes | Current outcome, or `null` until one is recorded. `Selected` and `Not selected` are illustrative values only. |
-| `updatedAt` | ISO 8601 UTC timestamp | Yes | When this application record was last updated. |
+| applicationId | string | Yes | Stable identifier for the role process |
+| candidateId | string | Yes | Reference to an existing CandidateProfile |
+| role | string | Yes | Role title; there is no role catalog in this model |
+| department | string | Yes | Department for this role |
+| stage | enum | Yes | Current stage for this application |
+| stageHistory | array of stage/reachedAt | Yes | Records each stage reached, including Final interview |
+| outcome | enum or null | Yes | Selected, Not selected, Withdrawn, or null until recorded |
+| updatedAt | ISO 8601 UTC timestamp | Yes | Last application update |
 
-## Relationships and rules
+Working stages: Added to role, Initial screening, Screening passed, Interview, Final interview, Decision.
 
-- One profile may have zero or many role applications; each application references one existing profile.
-- Profile identity, source channel, and optional skills summary are shared across applications. Stage and outcome are specific to one application.
-- `candidateId` and `applicationId` values are unique within their respective collections.
-- No unique constraint is proposed for `candidateId` plus `role`; separate applications can represent different hiring processes for the same role.
-- Stage and outcome values remain descriptive strings in this fixture. It does not define a complete lifecycle, allowed transitions, or validation enums.
+Working outcomes: Selected, Not selected, Withdrawn. Stage and outcome are separate. A stage update appends a history event; an outcome update does not change stage.
+
+## FutureRoleReview
+
+An explicit human HR review associated with the application that qualifies the profile for future consideration.
+
+| Field | Type | Required | Meaning |
+|---|---|---:|---|
+| reviewId | string | Yes | Stable review identifier |
+| candidateId | string | Yes | Profile being considered |
+| triggeringApplicationId | string | Yes | Prior application that reached Final interview and ended Not selected |
+| status | enum | Yes | Pending, Approved, or Not approved |
+| reviewerId | string or null | Yes | Authenticated HR identity after a decision; synthetic placeholder in the fixture |
+| reviewedAt | timestamp or null | Yes | Time of the human decision |
+
+Create a Pending review only when the triggering application has Screening passed and Final interview stage-history events and outcome Not selected. Pending reviews have no reviewer or review timestamp. Approved and Not approved reviews require both. This review permits or declines future consideration; it is not a hiring decision or candidate recommendation.
+
+The shared contract checks that the current stage matches the last history event and that history timestamps are chronological. The schema enforces that the triggering application belongs to the same candidate. The seed validates review eligibility. API authorization and reviewer attribution depend on SSO and are not implemented yet.
+
+## Relationships and safeguards
+
+- One profile can have zero or many role applications.
+- One profile can have multiple applications across departments.
+- Each reuse-review record references one candidate and one of that candidate's applications; an application can trigger at most one review record.
+- A new role creates a new application and never overwrites the source profile or prior applications.
+- Skills remain optional descriptive strings; do not add scores, ranking, model-generated suitability, or automated matching.
+- Production retention, consent, access controls, and cross-department sharing require HR policy approval.
 
 ## Synthetic fixture
 
-Keep `docs/data/fixtures/template.synthetic.json` small, deterministic, and entirely synthetic. It covers referral and other channels, multiple applications for one profile, selected and not-selected outcomes, and a profile with no applications. No real names, contact details, resumes, or interview notes belong in the fixture.
+The deterministic fixture contains 15 fabricated profiles, 16 applications, and four future-role reviews. It includes:
 
-The sample skills are descriptive labels only. Do not attach ratings, dates, assessment authors, or reuse eligibility to them.
+- A non-selected candidate who did not reach Final interview and has no review.
+- Pending, Approved, and Not approved reviews for candidates who did reach Final interview and were Not selected.
+- An approved candidate with a separate new application in another department.
+- A Final interview in progress with no outcome, a Withdrawn outcome, multiple applications for one profile, and a profile with no application.
 
-## Deferred decisions
+## SQLite representation
 
-- External profile identifiers, source adapters, and synchronization.
-- A role catalog.
-- Skill evidence history, assessment aggregation, and reusable-candidate criteria.
-- Approved stage/outcome values and transition rules.
-- SQL driver, persistence schema, and migrations.
+Migration 0001 creates candidate_profiles and role_applications. Migration 0002 adds department and serialized stage history and creates future_role_reviews. The seed serializes skills and stage history as JSON text. SQLite is the current working training-MVP choice; production hosting remains undecided.

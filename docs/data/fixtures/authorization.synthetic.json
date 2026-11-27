@@ -1,33 +1,23 @@
 {
   "syntheticOnly": true,
   "discussionFixture": true,
-  "notice": "Synthetic discussion example only. Role names and admin capabilities are illustrative, not an approved authorization policy, persistence schema, or SSO mapping. User IDs are fabricated placeholders; no credentials, contact details, or identity-provider identifiers are included.",
+  "notice": "No credentials or identity-provider identifiers are included. HR-only SSO is the intended model; authentication is not implemented.",
   "users": [
     {
-      "userId": "user-sample-admin-001",
-      "roles": ["Admin"]
-    },
-    {
-      "userId": "user-sample-recruiter-001",
-      "roles": ["Recruiter"]
-    },
-    {
-      "userId": "user-sample-manager-001",
-      "roles": ["Manager"]
+      "userId": "hr-user-sample-001",
+      "persona": "HR",
+      "authentication": "SSO (not implemented)"
     }
   ],
-  "illustrativeAdminCapabilities": [
-    "addUser",
-    "removeUser",
-    "addCandidate",
-    "removeCandidate",
-    "addRoleApplication",
-    "removeRoleApplication"
+  "notInMvp": [
+    "Administrator console",
+    "Hiring-manager application access",
+    "Local password authentication",
+    "Manual candidate profile creation or editing"
   ],
-  "openQuestions": [
-    "Recruiter and manager capabilities are not defined.",
-    "Does removing a user deactivate access or delete a local user record?",
-    "How should removing a candidate with role applications behave?",
-    "How will an authenticated SSO identity map to an application user and role?"
+  "policyOwnerQuestions": [
+    "Which HR policy owner approves access, retention, and consent rules?",
+    "What controls are required before cross-department consideration?",
+    "How should an SSO identity map to an HR user for review attribution?"
   ]
 }
